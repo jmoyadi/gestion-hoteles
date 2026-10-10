@@ -11,7 +11,7 @@ public class Cliente {
     // Atributos privados de Cliente
     private int id;
     private String nombre;
-    private String apellido;
+    private String apellidos;
     private String email;
 
 }

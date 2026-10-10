@@ -1,4 +1,4 @@
-```java
+
 package com.databuilders.hoteles.modelo;
 
 import java.time.LocalDate;
