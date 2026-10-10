@@ -1,14 +1,14 @@
 package com.databuilders.hoteles.modelo;
 
 /**
- * Representa a un cliente de la cadena hotelera.
+ * Representa un cliente de la cadena hotelera.
  *
  * Contiene los datos básicos necesarios para
- * identificar y consultar a los clientes.
+ *a cada cliente.
  */
 public class Cliente {
 
-    // Atributos privados del cliente
+    // Atributos privados de Cliente
     private int id;
     private String nombre;
     private String apellido;
