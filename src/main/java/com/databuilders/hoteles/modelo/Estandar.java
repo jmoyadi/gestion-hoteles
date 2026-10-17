@@ -1,5 +1,7 @@
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
+
 /**
  * Representa una habitación estándar.
  *
@@ -13,7 +15,8 @@ public class Estandar extends Habitacion {
     private boolean tieneMinibar;
 
     public Estandar(int id, int numero, int capacidad, double precioNoche,
-                    boolean tieneEscritorio, boolean tieneMinibar) {
+                    boolean tieneEscritorio, boolean tieneMinibar)
+            throws DatosInvalidosException {
         super(id, numero, capacidad, precioNoche);
         this.tieneEscritorio = tieneEscritorio;
         this.tieneMinibar = tieneMinibar;

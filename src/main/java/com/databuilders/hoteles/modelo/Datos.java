@@ -1,48 +1,56 @@
 
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.ElementoDuplicadoException;
+import com.databuilders.hoteles.excepciones.ElementoNoEncontradoException;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contiene todos los datos de la aplicación y las operaciones sobre ellos (MVC).
+ *
+ * Gestión de excepciones propias añadida con ayuda de IA (Claude).
+ */
 public class Datos {
 
     private final List<Cliente> clientes = new ArrayList<>();
     private final List<Hotel> hoteles = new ArrayList<>();
     private final List<Reserva> reservas = new ArrayList<>();
 
-    public void agregarCliente(Cliente cliente) {
+    public void agregarCliente(Cliente cliente) throws ElementoDuplicadoException {
         if (cliente == null) {
             throw new IllegalArgumentException("El cliente no puede ser nulo.");
         }
 
-        if (buscarClientePorId(cliente.getId()) != null) {
-            throw new IllegalArgumentException(
+        if (encontrarCliente(cliente.getId()) != null) {
+            throw new ElementoDuplicadoException(
                     "Ya existe un cliente con ese ID.");
         }
 
         clientes.add(cliente);
     }
 
-    public void agregarHotel(Hotel hotel) {
+    public void agregarHotel(Hotel hotel) throws ElementoDuplicadoException {
         if (hotel == null) {
             throw new IllegalArgumentException("El hotel no puede ser nulo.");
         }
 
-        if (buscarHotelPorId(hotel.getId()) != null) {
-            throw new IllegalArgumentException(
+        if (encontrarHotel(hotel.getId()) != null) {
+            throw new ElementoDuplicadoException(
                     "Ya existe un hotel con ese ID.");
         }
 
         hoteles.add(hotel);
     }
 
-    public void agregarReserva(Reserva reserva) {
+    public void agregarReserva(Reserva reserva) throws ElementoDuplicadoException {
         if (reserva == null) {
             throw new IllegalArgumentException("La reserva no puede ser nula.");
         }
 
-        if (buscarReservaPorId(reserva.getId()) != null) {
-            throw new IllegalArgumentException(
+        if (encontrarReserva(reserva.getId()) != null) {
+            throw new ElementoDuplicadoException(
                     "Ya existe una reserva con ese ID.");
         }
 
@@ -54,7 +62,21 @@ public class Datos {
         }
     }
 
-    public Cliente buscarClientePorId(int id) {
+    /**
+     * Devuelve el cliente con ese id o lanza una excepción si no existe,
+     * en lugar de devolver null (evita NullPointerException en quien lo llama).
+     */
+    public Cliente buscarClientePorId(int id) throws ElementoNoEncontradoException {
+        Cliente cliente = encontrarCliente(id);
+        if (cliente == null) {
+            throw new ElementoNoEncontradoException(
+                    "No existe un cliente con el ID " + id + ".");
+        }
+        return cliente;
+    }
+
+    /** Búsqueda interna: devuelve null si no existe (solo para comprobar duplicados). */
+    private Cliente encontrarCliente(int id) {
         for (Cliente cliente : clientes) {
             if (cliente.getId() == id) {
                 return cliente;
@@ -63,7 +85,21 @@ public class Datos {
         return null;
     }
 
-    public Hotel buscarHotelPorId(int id) {
+    /**
+     * Devuelve el hotel con ese id o lanza una excepción si no existe,
+     * en lugar de devolver null (evita NullPointerException en quien lo llama).
+     */
+    public Hotel buscarHotelPorId(int id) throws ElementoNoEncontradoException {
+        Hotel hotel = encontrarHotel(id);
+        if (hotel == null) {
+            throw new ElementoNoEncontradoException(
+                    "No existe un hotel con el ID " + id + ".");
+        }
+        return hotel;
+    }
+
+    /** Búsqueda interna: devuelve null si no existe (solo para comprobar duplicados). */
+    private Hotel encontrarHotel(int id) {
         for (Hotel hotel : hoteles) {
             if (hotel.getId() == id) {
                 return hotel;
@@ -72,7 +108,21 @@ public class Datos {
         return null;
     }
 
-    public Reserva buscarReservaPorId(int id) {
+    /**
+     * Devuelve el reserva con ese id o lanza una excepción si no existe,
+     * en lugar de devolver null (evita NullPointerException en quien lo llama).
+     */
+    public Reserva buscarReservaPorId(int id) throws ElementoNoEncontradoException {
+        Reserva reserva = encontrarReserva(id);
+        if (reserva == null) {
+            throw new ElementoNoEncontradoException(
+                    "No existe una reserva con el ID " + id + ".");
+        }
+        return reserva;
+    }
+
+    /** Búsqueda interna: devuelve null si no existe (solo para comprobar duplicados). */
+    private Reserva encontrarReserva(int id) {
         for (Reserva reserva : reservas) {
             if (reserva.getId() == id) {
                 return reserva;

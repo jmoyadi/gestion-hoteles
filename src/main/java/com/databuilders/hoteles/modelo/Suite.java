@@ -1,5 +1,7 @@
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
+
 /**
  * Representa una habitación suite.
  *
@@ -13,11 +15,12 @@ public class Suite extends Habitacion {
     private int numeroBanos;
 
     public Suite(int id, int numero, int capacidad, double precioNoche,
-                 boolean tieneSalonIndependiente, int numeroBanos) {
+                 boolean tieneSalonIndependiente, int numeroBanos)
+            throws DatosInvalidosException {
         super(id, numero, capacidad, precioNoche);
 
         if (numeroBanos <= 0) {
-            throw new IllegalArgumentException("El número de baños debe ser positivo.");
+            throw new DatosInvalidosException("El número de baños debe ser positivo.");
         }
 
         this.tieneSalonIndependiente = tieneSalonIndependiente;
@@ -36,9 +39,9 @@ public class Suite extends Habitacion {
         return numeroBanos;
     }
 
-    public void setNumeroBanos(int numeroBanos) {
+    public void setNumeroBanos(int numeroBanos) throws DatosInvalidosException {
         if (numeroBanos <= 0) {
-            throw new IllegalArgumentException("El número de baños debe ser positivo.");
+            throw new DatosInvalidosException("El número de baños debe ser positivo.");
         }
         this.numeroBanos = numeroBanos;
     }

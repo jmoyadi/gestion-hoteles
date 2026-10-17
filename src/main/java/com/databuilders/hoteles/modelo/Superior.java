@@ -1,5 +1,7 @@
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
+
 /**
  * Representa una habitación superior.
  *
@@ -13,7 +15,8 @@ public class Superior extends Habitacion {
     private boolean tieneVistas;
 
     public Superior(int id, int numero, int capacidad, double precioNoche,
-                    boolean tieneZonaEstar, boolean tieneVistas) {
+                    boolean tieneZonaEstar, boolean tieneVistas)
+            throws DatosInvalidosException {
         super(id, numero, capacidad, precioNoche);
         this.tieneZonaEstar = tieneZonaEstar;
         this.tieneVistas = tieneVistas;

@@ -1,5 +1,8 @@
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
+import com.databuilders.hoteles.excepciones.ElementoDuplicadoException;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +26,15 @@ public class Hotel {
     // Hotel 1 ◆—tiene— 1..* Habitacion (composición): habitaciones del hotel
     private List<Habitacion> habitaciones = new ArrayList<>();
 
-    public Hotel(int id, String nombre, String ciudad) {
+    public Hotel(int id, String nombre, String ciudad) throws DatosInvalidosException {
         if (id <= 0) {
-            throw new IllegalArgumentException("El ID debe ser positivo.");
+            throw new DatosInvalidosException("El ID debe ser positivo.");
         }
         if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre del hotel es obligatorio.");
+            throw new DatosInvalidosException("El nombre del hotel es obligatorio.");
         }
         if (ciudad == null || ciudad.isBlank()) {
-            throw new IllegalArgumentException("La ciudad es obligatoria.");
+            throw new DatosInvalidosException("La ciudad es obligatoria.");
         }
 
         this.id = id;
@@ -39,7 +42,7 @@ public class Hotel {
         this.ciudad = ciudad;
     }
 
-    public void agregarHabitacion(Habitacion habitacion) {
+    public void agregarHabitacion(Habitacion habitacion) throws ElementoDuplicadoException {
         if (habitacion == null) {
             throw new IllegalArgumentException("La habitación no puede ser nula.");
         }
@@ -47,8 +50,8 @@ public class Hotel {
         for (Habitacion existente : habitaciones) {
             if (existente.getId() == habitacion.getId()
                     || existente.getNumero() == habitacion.getNumero()) {
-                throw new IllegalArgumentException(
-                        "Ya existe una habitación con ese ID o número.");
+                throw new ElementoDuplicadoException(
+                        "Ya existe una habitación con ese ID o número en este hotel.");
             }
         }
 
@@ -56,7 +59,7 @@ public class Hotel {
     }
 
     public List<Habitacion> getHabitacionesDisponibles(
-            LocalDate entrada, LocalDate salida) {
+            LocalDate entrada, LocalDate salida) throws DatosInvalidosException {
 
         validarFechas(entrada, salida);
 
@@ -72,14 +75,14 @@ public class Hotel {
     }
 
     public int contarHabitacionesDisponibles(
-            LocalDate entrada, LocalDate salida) {
+            LocalDate entrada, LocalDate salida) throws DatosInvalidosException {
 
         return getHabitacionesDisponibles(entrada, salida).size();
     }
 
-    private void validarFechas(LocalDate entrada, LocalDate salida) {
+    private void validarFechas(LocalDate entrada, LocalDate salida) throws DatosInvalidosException {
         if (entrada == null || salida == null || !salida.isAfter(entrada)) {
-            throw new IllegalArgumentException("Las fechas no son válidas.");
+            throw new DatosInvalidosException("Las fechas no son válidas.");
         }
     }
 
@@ -99,16 +102,16 @@ public class Hotel {
         return new ArrayList<>(habitaciones);
     }
 
-    public void setNombre(String nombre) {
+    public void setNombre(String nombre) throws DatosInvalidosException {
         if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre del hotel es obligatorio.");
+            throw new DatosInvalidosException("El nombre del hotel es obligatorio.");
         }
         this.nombre = nombre;
     }
 
-    public void setCiudad(String ciudad) {
+    public void setCiudad(String ciudad) throws DatosInvalidosException {
         if (ciudad == null || ciudad.isBlank()) {
-            throw new IllegalArgumentException("La ciudad es obligatoria.");
+            throw new DatosInvalidosException("La ciudad es obligatoria.");
         }
         this.ciudad = ciudad;
     }

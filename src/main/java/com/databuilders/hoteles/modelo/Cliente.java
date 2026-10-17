@@ -1,5 +1,7 @@
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,18 +24,19 @@ public class Cliente {
     // Cliente 1 —realiza— 0..* Reserva: reservas hechas por este cliente
     private List<Reserva> reservas = new ArrayList<>();
 
-    public Cliente(int id, String nombre, String apellidos, String email) {
+    public Cliente(int id, String nombre, String apellidos, String email)
+            throws DatosInvalidosException {
         if (id <= 0) {
-            throw new IllegalArgumentException("El ID debe ser positivo.");
+            throw new DatosInvalidosException("El ID debe ser positivo.");
         }
         if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre es obligatorio.");
+            throw new DatosInvalidosException("El nombre es obligatorio.");
         }
         if (apellidos == null || apellidos.isBlank()) {
-            throw new IllegalArgumentException("Los apellidos son obligatorios.");
+            throw new DatosInvalidosException("Los apellidos son obligatorios.");
         }
         if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-            throw new IllegalArgumentException("El email no es válido.");
+            throw new DatosInvalidosException("El email no es válido.");
         }
 
         this.id = id;
@@ -71,23 +74,23 @@ public class Cliente {
         return new ArrayList<>(reservas);
     }
 
-    public void setNombre(String nombre) {
+    public void setNombre(String nombre) throws DatosInvalidosException {
         if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre es obligatorio.");
+            throw new DatosInvalidosException("El nombre es obligatorio.");
         }
         this.nombre = nombre;
     }
 
-    public void setApellidos(String apellidos) {
+    public void setApellidos(String apellidos) throws DatosInvalidosException {
         if (apellidos == null || apellidos.isBlank()) {
-            throw new IllegalArgumentException("Los apellidos son obligatorios.");
+            throw new DatosInvalidosException("Los apellidos son obligatorios.");
         }
         this.apellidos = apellidos;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(String email) throws DatosInvalidosException {
         if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-            throw new IllegalArgumentException("El email no es válido.");
+            throw new DatosInvalidosException("El email no es válido.");
         }
         this.email = email;
     }

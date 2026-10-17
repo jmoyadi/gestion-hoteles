@@ -1,6 +1,9 @@
 
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
+import com.databuilders.hoteles.excepciones.OperacionNoPermitidaException;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -34,28 +37,28 @@ public class Reserva {
 
     public Reserva(int id, LocalDate fechaEntrada, LocalDate fechaSalida,
                    int numPersonas, Cliente cliente, Hotel hotel,
-                   List<Habitacion> habitaciones) {
+                   List<Habitacion> habitaciones) throws DatosInvalidosException {
 
         if (id <= 0) {
-            throw new IllegalArgumentException("El ID debe ser positivo.");
+            throw new DatosInvalidosException("El ID debe ser positivo.");
         }
         if (fechaEntrada == null || fechaSalida == null) {
-            throw new IllegalArgumentException("Las fechas son obligatorias.");
+            throw new DatosInvalidosException("Las fechas son obligatorias.");
         }
         if (!fechaSalida.isAfter(fechaEntrada)) {
-            throw new IllegalArgumentException(
+            throw new DatosInvalidosException(
                     "La fecha de salida debe ser posterior a la entrada.");
         }
         if (numPersonas <= 0) {
-            throw new IllegalArgumentException(
+            throw new DatosInvalidosException(
                     "El número de personas debe ser positivo.");
         }
         if (cliente == null || hotel == null) {
-            throw new IllegalArgumentException(
+            throw new DatosInvalidosException(
                     "La reserva debe tener un cliente y un hotel.");
         }
         if (habitaciones == null || habitaciones.isEmpty()) {
-            throw new IllegalArgumentException(
+            throw new DatosInvalidosException(
                     "La reserva debe incluir al menos una habitación.");
         }
 
@@ -86,9 +89,13 @@ public class Reserva {
         return total;
     }
 
-    public void cancelar() {
+    public void cancelar() throws OperacionNoPermitidaException {
+        if (estado == EstadoReserva.CANCELADA) {
+            throw new OperacionNoPermitidaException(
+                    "La reserva ya está cancelada.");
+        }
         if (estado == EstadoReserva.FINALIZADA) {
-            throw new IllegalStateException(
+            throw new OperacionNoPermitidaException(
                     "No se puede cancelar una reserva finalizada.");
         }
 

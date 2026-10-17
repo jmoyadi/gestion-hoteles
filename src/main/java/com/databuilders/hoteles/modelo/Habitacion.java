@@ -1,5 +1,7 @@
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,18 +33,19 @@ public abstract class Habitacion {
     // dos sentidos; la habitación necesita conocer sus reservas para saber si está libre.
     private final List<Reserva> reservas = new ArrayList<>();
 
-    public Habitacion(int id, int numero, int capacidad, double precioNoche) {
+    public Habitacion(int id, int numero, int capacidad, double precioNoche)
+            throws DatosInvalidosException {
         if (id <= 0) {
-            throw new IllegalArgumentException("El ID debe ser positivo.");
+            throw new DatosInvalidosException("El ID debe ser positivo.");
         }
         if (numero <= 0) {
-            throw new IllegalArgumentException("El número de habitación debe ser positivo.");
+            throw new DatosInvalidosException("El número de habitación debe ser positivo.");
         }
         if (capacidad <= 0) {
-            throw new IllegalArgumentException("La capacidad debe ser mayor que cero.");
+            throw new DatosInvalidosException("La capacidad debe ser mayor que cero.");
         }
         if (precioNoche < 0) {
-            throw new IllegalArgumentException("El precio por noche no puede ser negativo.");
+            throw new DatosInvalidosException("El precio por noche no puede ser negativo.");
         }
 
         this.id = id;
@@ -67,23 +70,23 @@ public abstract class Habitacion {
         return precioNoche;
     }
 
-    public void setNumero(int numero) {
+    public void setNumero(int numero) throws DatosInvalidosException {
         if (numero <= 0) {
-            throw new IllegalArgumentException("El número de habitación debe ser positivo.");
+            throw new DatosInvalidosException("El número de habitación debe ser positivo.");
         }
         this.numero = numero;
     }
 
-    public void setCapacidad(int capacidad) {
+    public void setCapacidad(int capacidad) throws DatosInvalidosException {
         if (capacidad <= 0) {
-            throw new IllegalArgumentException("La capacidad debe ser mayor que cero.");
+            throw new DatosInvalidosException("La capacidad debe ser mayor que cero.");
         }
         this.capacidad = capacidad;
     }
 
-    public void setPrecioNoche(double precioNoche) {
+    public void setPrecioNoche(double precioNoche) throws DatosInvalidosException {
         if (precioNoche < 0) {
-            throw new IllegalArgumentException("El precio por noche no puede ser negativo.");
+            throw new DatosInvalidosException("El precio por noche no puede ser negativo.");
         }
         this.precioNoche = precioNoche;
     }
@@ -113,9 +116,10 @@ public abstract class Habitacion {
      * Es un método concreto (no abstracto) porque la regla es la misma para
      * Estandar, Superior y Suite, como en el diagrama de clases.
      */
-    public boolean estaDisponible(LocalDate entrada, LocalDate salida) {
+    public boolean estaDisponible(LocalDate entrada, LocalDate salida)
+            throws DatosInvalidosException {
         if (entrada == null || salida == null || !salida.isAfter(entrada)) {
-            throw new IllegalArgumentException("Las fechas no son válidas.");
+            throw new DatosInvalidosException("Las fechas no son válidas.");
         }
 
         for (Reserva reserva : reservas) {
