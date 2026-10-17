@@ -1,8 +1,10 @@
 
 package com.databuilders.hoteles.modelo;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
 import com.databuilders.hoteles.excepciones.ElementoDuplicadoException;
 import com.databuilders.hoteles.excepciones.ElementoNoEncontradoException;
+import com.databuilders.hoteles.excepciones.HabitacionNoDisponibleException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,14 @@ public class Datos {
         hoteles.add(hotel);
     }
 
-    public void agregarReserva(Reserva reserva) throws ElementoDuplicadoException {
+    /**
+     * Registra una reserva después de comprobar las reglas que dependen del
+     * estado del sistema. Todo se comprueba ANTES de registrar nada, para que
+     * un error no deje la reserva registrada a medias.
+     */
+    public void agregarReserva(Reserva reserva) throws ElementoDuplicadoException,
+            ElementoNoEncontradoException, HabitacionNoDisponibleException,
+            DatosInvalidosException {
         if (reserva == null) {
             throw new IllegalArgumentException("La reserva no puede ser nula.");
         }
@@ -54,6 +63,26 @@ public class Datos {
                     "Ya existe una reserva con ese ID.");
         }
 
+        // El cliente y el hotel tienen que ser los mismos objetos dados de alta
+        // (se compara con != para exigir el mismo objeto, no solo el mismo id)
+        if (encontrarCliente(reserva.getCliente().getId()) != reserva.getCliente()) {
+            throw new ElementoNoEncontradoException(
+                    "El cliente de la reserva no está registrado.");
+        }
+        if (encontrarHotel(reserva.getHotel().getId()) != reserva.getHotel()) {
+            throw new ElementoNoEncontradoException(
+                    "El hotel de la reserva no está registrado.");
+        }
+
+        // Todas las habitaciones libres en esas fechas
+        for (Habitacion habitacion : reserva.getHabitaciones()) {
+            if (!habitacion.estaDisponible(reserva.getFechaEntrada(), reserva.getFechaSalida())) {
+                throw new HabitacionNoDisponibleException("La habitación "
+                        + habitacion.getNumero() + " ya está reservada en esas fechas.");
+            }
+        }
+
+        // Solo si todo es correcto se registra la reserva
         reservas.add(reserva);
         reserva.getCliente().agregarReserva(reserva);
         // La habitación también guarda la reserva para poder calcular su disponibilidad
