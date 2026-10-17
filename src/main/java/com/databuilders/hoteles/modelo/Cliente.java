@@ -91,4 +91,11 @@ public class Cliente {
         }
         this.email = email;
     }
+
+    /** Texto legible para mostrar el cliente en la consola. */
+    @Override
+    public String toString() {
+        return String.format("[%d] %s %s · %s · %d reserva(s)",
+                id, nombre, apellidos, email, reservas.size());
+    }
 }

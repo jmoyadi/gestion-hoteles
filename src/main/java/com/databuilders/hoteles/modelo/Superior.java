@@ -34,4 +34,11 @@ public class Superior extends Habitacion {
     public void setTieneVistas(boolean tieneVistas) {
         this.tieneVistas = tieneVistas;
     }
+
+    @Override
+    public String toString() {
+        return "Superior · " + super.toString()
+                + " · zona de estar: " + siNo(tieneZonaEstar)
+                + " · vistas: " + siNo(tieneVistas);
+    }
 }

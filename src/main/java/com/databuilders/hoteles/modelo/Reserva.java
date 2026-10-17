@@ -130,4 +130,17 @@ public class Reserva {
     public List<Habitacion> getHabitaciones() {
         return new ArrayList<>(habitaciones);
     }
+
+    /**
+     * Texto legible de la reserva. Del cliente y del hotel solo se muestra el
+     * nombre: imprimir el objeto entero provocaría un bucle infinito, porque el
+     * cliente también conoce sus reservas.
+     */
+    @Override
+    public String toString() {
+        return String.format("[%d] %s → %s (%d noches) · %s %s · %s · %d hab. · %d pers. · %.2f € · %s",
+                id, fechaEntrada, fechaSalida, calcularNoches(),
+                cliente.getNombre(), cliente.getApellidos(), hotel.getNombre(),
+                habitaciones.size(), numPersonas, importe, estado);
+    }
 }

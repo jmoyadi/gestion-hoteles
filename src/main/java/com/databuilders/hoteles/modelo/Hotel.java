@@ -112,4 +112,11 @@ public class Hotel {
         }
         this.ciudad = ciudad;
     }
+
+    /** Texto legible para mostrar el hotel en la consola. */
+    @Override
+    public String toString() {
+        return String.format("[%d] %s (%s) · %d habitación(es)",
+                id, nombre, ciudad, habitaciones.size());
+    }
 }

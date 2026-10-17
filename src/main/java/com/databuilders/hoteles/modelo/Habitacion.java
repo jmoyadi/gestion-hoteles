@@ -128,4 +128,19 @@ public abstract class Habitacion {
         }
         return true;
     }
+
+    /**
+     * Parte común del texto de una habitación. Las subclases la reutilizan
+     * con super.toString() y añaden sus atributos propios.
+     */
+    @Override
+    public String toString() {
+        return String.format("Hab. %d · %d persona(s) · %.2f €/noche",
+                numero, capacidad, precioNoche);
+    }
+
+    /** Convierte un booleano en «sí» o «no» para mostrarlo al usuario. */
+    protected static String siNo(boolean valor) {
+        return valor ? "sí" : "no";
+    }
 }

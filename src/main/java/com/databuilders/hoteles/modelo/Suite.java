@@ -42,4 +42,11 @@ public class Suite extends Habitacion {
         }
         this.numeroBanos = numeroBanos;
     }
+
+    @Override
+    public String toString() {
+        return "Suite · " + super.toString()
+                + " · salón independiente: " + siNo(tieneSalonIndependiente)
+                + " · baños: " + numeroBanos;
+    }
 }

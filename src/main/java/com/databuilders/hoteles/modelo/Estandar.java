@@ -34,4 +34,11 @@ public class Estandar extends Habitacion {
     public void setTieneMinibar(boolean tieneMinibar) {
         this.tieneMinibar = tieneMinibar;
     }
+
+    @Override
+    public String toString() {
+        return "Estándar · " + super.toString()
+                + " · escritorio: " + siNo(tieneEscritorio)
+                + " · minibar: " + siNo(tieneMinibar);
+    }
 }
