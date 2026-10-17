@@ -1,7 +1,5 @@
 package com.databuilders.hoteles.modelo;
 
-import java.time.LocalDate;
-
 /**
  * Representa una habitación suite.
  *
@@ -43,10 +41,5 @@ public class Suite extends Habitacion {
             throw new IllegalArgumentException("El número de baños debe ser positivo.");
         }
         this.numeroBanos = numeroBanos;
-    }
-
-    @Override
-    public boolean estaDisponible(LocalDate entrada, LocalDate salida) {
-        return true;
     }
 }

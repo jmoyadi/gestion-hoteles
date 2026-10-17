@@ -1,7 +1,5 @@
 package com.databuilders.hoteles.modelo;
 
-import java.time.LocalDate;
-
 /**
  * Representa una habitación estándar.
  *
@@ -35,10 +33,5 @@ public class Estandar extends Habitacion {
 
     public void setTieneMinibar(boolean tieneMinibar) {
         this.tieneMinibar = tieneMinibar;
-    }
-
-    @Override
-    public boolean estaDisponible(LocalDate entrada, LocalDate salida) {
-        return true;
     }
 }

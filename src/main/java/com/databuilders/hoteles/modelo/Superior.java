@@ -1,7 +1,5 @@
 package com.databuilders.hoteles.modelo;
 
-import java.time.LocalDate;
-
 /**
  * Representa una habitación superior.
  *
@@ -35,10 +33,5 @@ public class Superior extends Habitacion {
 
     public void setTieneVistas(boolean tieneVistas) {
         this.tieneVistas = tieneVistas;
-    }
-
-    @Override
-    public boolean estaDisponible(LocalDate entrada, LocalDate salida) {
-        return true;
     }
 }

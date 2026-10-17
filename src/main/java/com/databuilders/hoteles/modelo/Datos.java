@@ -48,6 +48,10 @@ public class Datos {
 
         reservas.add(reserva);
         reserva.getCliente().agregarReserva(reserva);
+        // La habitación también guarda la reserva para poder calcular su disponibilidad
+        for (Habitacion habitacion : reserva.getHabitaciones()) {
+            habitacion.agregarReserva(reserva);
+        }
     }
 
     public Cliente buscarClientePorId(int id) {

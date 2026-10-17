@@ -1,6 +1,8 @@
 package com.databuilders.hoteles.modelo;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Representa una habitación de un hotel.
@@ -12,6 +14,8 @@ import java.time.LocalDate;
  *
  * Es ABSTRACTA: no se puede crear una habitación genérica,
  * solo de un tipo concreto (Estandar, Superior o Suite).
+ *
+ * estaDisponible() y la lista de reservas corregidos con ayuda de IA (Claude).
  */
 public abstract class Habitacion {
 
@@ -20,6 +24,12 @@ public abstract class Habitacion {
     private int numero;
     private int capacidad;
     private double precioNoche;
+
+    // Relaciones (líneas del diagrama de clases)
+    // Reserva 0..* —incluye— 1..* Habitacion: reservas en las que está esta habitación.
+    // La asociación no tiene flecha en el diagrama, así que se puede recorrer en los
+    // dos sentidos; la habitación necesita conocer sus reservas para saber si está libre.
+    private final List<Reserva> reservas = new ArrayList<>();
 
     public Habitacion(int id, int numero, int capacidad, double precioNoche) {
         if (id <= 0) {
@@ -78,5 +88,44 @@ public abstract class Habitacion {
         this.precioNoche = precioNoche;
     }
 
-    public abstract boolean estaDisponible(LocalDate entrada, LocalDate salida);
+    /**
+     * Registra una reserva que incluye esta habitación.
+     * Visibilidad de paquete: solo la llama Datos al dar de alta la reserva,
+     * para que la vista no pueda alterar la ocupación directamente.
+     */
+    void agregarReserva(Reserva reserva) {
+        if (reserva == null) {
+            throw new IllegalArgumentException("La reserva no puede ser nula.");
+        }
+        if (!reservas.contains(reserva)) {
+            reservas.add(reserva);
+        }
+    }
+
+    /**
+     * Indica si la habitación está libre entre dos fechas.
+     *
+     * Está ocupada si alguna de sus reservas NO cancelada se solapa con el
+     * periodo pedido (regla de la nota del diagrama). Dos periodos se solapan
+     * cuando uno empieza antes de que acabe el otro y viceversa; el día de
+     * salida queda libre para una nueva entrada.
+     *
+     * Es un método concreto (no abstracto) porque la regla es la misma para
+     * Estandar, Superior y Suite, como en el diagrama de clases.
+     */
+    public boolean estaDisponible(LocalDate entrada, LocalDate salida) {
+        if (entrada == null || salida == null || !salida.isAfter(entrada)) {
+            throw new IllegalArgumentException("Las fechas no son válidas.");
+        }
+
+        for (Reserva reserva : reservas) {
+            boolean activa = reserva.getEstado() != EstadoReserva.CANCELADA;
+            boolean seSolapa = entrada.isBefore(reserva.getFechaSalida())
+                    && salida.isAfter(reserva.getFechaEntrada());
+            if (activa && seSolapa) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
