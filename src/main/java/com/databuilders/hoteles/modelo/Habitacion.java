@@ -19,7 +19,7 @@ import java.util.List;
  *
  * estaDisponible() y la lista de reservas corregidos con ayuda de IA (Claude).
  */
-public abstract class Habitacion {
+public abstract class Habitacion implements Identificable {
 
     // Atributos privados comunes a todas las habitaciones
     private int id;
@@ -54,6 +54,7 @@ public abstract class Habitacion {
         this.precioNoche = precioNoche;
     }
 
+    @Override
     public int getId() {
         return id;
     }

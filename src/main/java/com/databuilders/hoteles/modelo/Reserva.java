@@ -21,7 +21,7 @@ import java.util.List;
  *
  * Atributos de relación y validaciones de la reserva añadidos con ayuda de IA (Claude).
  */
-public final class Reserva {
+public final class Reserva implements Identificable {
 
     // Atributos privados de Reserva
     private int id;
@@ -133,6 +133,7 @@ public final class Reserva {
         estado = EstadoReserva.CANCELADA;
     }
 
+    @Override
     public int getId() {
         return id;
     }

@@ -15,7 +15,7 @@ import java.util.List;
  *
  * Atributos de relación añadidos con ayuda de IA (Claude).
  */
-public class Hotel {
+public class Hotel implements Identificable {
 
     // Atributos privados de Hotel
     private int id;
@@ -86,6 +86,7 @@ public class Hotel {
         }
     }
 
+    @Override
     public int getId() {
         return id;
     }

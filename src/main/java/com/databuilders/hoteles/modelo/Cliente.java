@@ -12,7 +12,7 @@ import java.util.List;
  *
  * Atributos de relación añadidos con ayuda de IA (Claude).
  */
-public class Cliente {
+public class Cliente implements Identificable {
 
     // Atributos privados de Cliente
     private int id;
@@ -54,6 +54,7 @@ public class Cliente {
         }
     }
 
+    @Override
     public int getId() {
         return id;
     }
