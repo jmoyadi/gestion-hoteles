@@ -16,8 +16,12 @@ import java.util.List;
  * queda con las reglas de negocio (por ejemplo, que el cliente de una
  * reserva esté registrado o que las habitaciones estén libres).
  *
- * Gestión de excepciones propias y uso de la clase genérica Repositorio
- * añadidos con ayuda de IA (Claude).
+ * Datos es la única puerta de entrada para dar de alta reservas y
+ * habitaciones: así se comprueban las reglas que afectan a toda la cadena
+ * y las listas que se guardan en dos sitios no pueden contradecirse.
+ *
+ * Gestión de excepciones propias, uso de la clase genérica Repositorio y
+ * alta de habitaciones añadidos con ayuda de IA (Claude).
  */
 public class Datos {
 
@@ -39,6 +43,30 @@ public class Datos {
             throw new IllegalArgumentException("El hotel no puede ser nulo.");
         }
         hoteles.agregar(hotel);
+    }
+
+    /**
+     * Añade una habitación al hotel indicado.
+     * El id de habitación es único en toda la cadena (se comprueba aquí,
+     * porque solo Datos conoce todos los hoteles); el número de puerta solo
+     * tiene que ser único dentro del hotel (lo comprueba Hotel).
+     */
+    public void agregarHabitacion(int idHotel, Habitacion habitacion)
+            throws ElementoNoEncontradoException, ElementoDuplicadoException {
+        if (habitacion == null) {
+            throw new IllegalArgumentException("La habitación no puede ser nula.");
+        }
+
+        Hotel hotel = hoteles.buscarPorId(idHotel);
+
+        for (Hotel otro : hoteles.listar()) {
+            if (otro.tieneHabitacion(habitacion.getId())) {
+                throw new ElementoDuplicadoException("Ya existe una habitación con el ID "
+                        + habitacion.getId() + " en el hotel " + otro.getNombre() + ".");
+            }
+        }
+
+        hotel.agregarHabitacion(habitacion);
     }
 
     /**
@@ -136,7 +164,14 @@ public class Datos {
         return hoteles.filtrar(hotel -> hotel.getCiudad().equalsIgnoreCase(busqueda));
     }
 
-    public List<Reserva> consultarReservasCliente(int idCliente) {
-        return reservas.filtrar(reserva -> reserva.getCliente().getId() == idCliente);
+    /**
+     * Reservas de un cliente. Se leen de la lista del propio cliente
+     * (getReservas() del diagrama), que es la única fuente para este dato.
+     * Lanza una excepción si el cliente no existe, para distinguir
+     * "no tiene reservas" de "ese cliente no existe".
+     */
+    public List<Reserva> consultarReservasCliente(int idCliente)
+            throws ElementoNoEncontradoException {
+        return clientes.buscarPorId(idCliente).getReservas();
     }
 }

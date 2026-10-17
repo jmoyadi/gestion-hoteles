@@ -45,7 +45,12 @@ public class Cliente implements Identificable {
         this.email = email;
     }
 
-    public void agregarReserva(Reserva reserva) {
+    /**
+     * Registra una reserva hecha por este cliente.
+     * Visibilidad de paquete: solo la llama Datos al dar de alta la reserva,
+     * así la lista del cliente y la de Datos no pueden contradecirse.
+     */
+    void agregarReserva(Reserva reserva) {
         if (reserva == null) {
             throw new IllegalArgumentException("La reserva no puede ser nula.");
         }

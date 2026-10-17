@@ -46,7 +46,8 @@ public class Controlador {
         return aTexto(datos.buscarClientesPorNombre(texto));
     }
 
-    public List<String> consultarReservasCliente(int idCliente) {
+    public List<String> consultarReservasCliente(int idCliente)
+            throws GestionHotelesException {
         return aTexto(datos.consultarReservasCliente(idCliente));
     }
 

@@ -13,7 +13,8 @@ import java.util.List;
  * Contiene los datos básicos para identificar
  * cada hotel.
  *
- * Atributos de relación añadidos con ayuda de IA (Claude).
+ * Atributos de relación y uso de Repositorio para las habitaciones
+ * añadidos con ayuda de IA (Claude).
  */
 public class Hotel implements Identificable {
 
@@ -24,7 +25,8 @@ public class Hotel implements Identificable {
 
     // Relaciones (líneas del diagrama de clases)
     // Hotel 1 ◆—tiene— 1..* Habitacion (composición): habitaciones del hotel
-    private List<Habitacion> habitaciones = new ArrayList<>();
+    // Se guardan en un Repositorio (LinkedHashMap por id), igual que en Datos
+    private final Repositorio<Habitacion> habitaciones = new Repositorio<>("una habitación");
 
     public Hotel(int id, String nombre, String ciudad) throws DatosInvalidosException {
         if (id <= 0) {
@@ -42,20 +44,32 @@ public class Hotel implements Identificable {
         this.ciudad = ciudad;
     }
 
-    public void agregarHabitacion(Habitacion habitacion) throws ElementoDuplicadoException {
+    /**
+     * Añade una habitación a este hotel.
+     * Visibilidad de paquete: solo la llama Datos.agregarHabitacion, que antes
+     * comprueba que el id no se use en ningún otro hotel de la cadena.
+     * Aquí se comprueba que el número de puerta no se repita en este hotel
+     * (el mismo número sí puede existir en otro hotel).
+     */
+    void agregarHabitacion(Habitacion habitacion) throws ElementoDuplicadoException {
         if (habitacion == null) {
             throw new IllegalArgumentException("La habitación no puede ser nula.");
         }
 
-        for (Habitacion existente : habitaciones) {
-            if (existente.getId() == habitacion.getId()
-                    || existente.getNumero() == habitacion.getNumero()) {
-                throw new ElementoDuplicadoException(
-                        "Ya existe una habitación con ese ID o número en este hotel.");
+        for (Habitacion existente : habitaciones.listar()) {
+            if (existente.getNumero() == habitacion.getNumero()) {
+                throw new ElementoDuplicadoException("Ya existe la habitación número "
+                        + habitacion.getNumero() + " en el hotel " + nombre + ".");
             }
         }
 
-        habitaciones.add(habitacion);
+        // El Repositorio rechaza además un id repetido dentro del hotel
+        habitaciones.agregar(habitacion);
+    }
+
+    /** Indica si este hotel tiene una habitación con ese id (lo usa Datos). */
+    boolean tieneHabitacion(int idHabitacion) {
+        return habitaciones.existe(idHabitacion);
     }
 
     public List<Habitacion> getHabitacionesDisponibles(
@@ -65,7 +79,7 @@ public class Hotel implements Identificable {
 
         List<Habitacion> disponibles = new ArrayList<>();
 
-        for (Habitacion habitacion : habitaciones) {
+        for (Habitacion habitacion : habitaciones.listar()) {
             if (habitacion.estaDisponible(entrada, salida)) {
                 disponibles.add(habitacion);
             }
@@ -99,8 +113,9 @@ public class Hotel implements Identificable {
         return ciudad;
     }
 
+    /** Habitaciones del hotel en orden de alta (lista no modificable). */
     public List<Habitacion> getHabitaciones() {
-        return new ArrayList<>(habitaciones);
+        return habitaciones.listar();
     }
 
     public void setNombre(String nombre) throws DatosInvalidosException {
@@ -121,6 +136,6 @@ public class Hotel implements Identificable {
     @Override
     public String toString() {
         return String.format("[%d] %s (%s) · %d habitación(es)",
-                id, nombre, ciudad, habitaciones.size());
+                id, nombre, ciudad, habitaciones.contar());
     }
 }
