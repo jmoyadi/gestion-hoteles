@@ -1,10 +1,16 @@
 package com.databuilders.hoteles.controlador;
 
+import com.databuilders.hoteles.excepciones.DatosInvalidosException;
 import com.databuilders.hoteles.excepciones.GestionHotelesException;
 import com.databuilders.hoteles.modelo.Cliente;
 import com.databuilders.hoteles.modelo.Datos;
+import com.databuilders.hoteles.modelo.Estandar;
+import com.databuilders.hoteles.modelo.Habitacion;
 import com.databuilders.hoteles.modelo.Hotel;
+import com.databuilders.hoteles.modelo.Suite;
+import com.databuilders.hoteles.modelo.Superior;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +23,9 @@ import java.util.List;
  *
  * Los errores llegan a la vista como GestionHotelesException (paquete
  * excepciones, fuera del modelo): la vista los captura y muestra el mensaje.
+ *
+ * Las fechas se reciben como LocalDate (java.time, no es una clase del modelo):
+ * la vista se encarga de leerlas y comprobar su formato.
  *
  * Operaciones del controlador añadidas con ayuda de IA (Claude).
  */
@@ -51,6 +60,15 @@ public class Controlador {
         return aTexto(datos.consultarReservasCliente(idCliente));
     }
 
+    public void modificarCliente(int id, String nombre, String apellidos, String email)
+            throws GestionHotelesException {
+        datos.modificarCliente(id, nombre, apellidos, email);
+    }
+
+    public void eliminarCliente(int id) throws GestionHotelesException {
+        datos.eliminarCliente(id);
+    }
+
     // ---------- Hoteles ----------
 
     public void altaHotel(int id, String nombre, String ciudad)
@@ -66,7 +84,81 @@ public class Controlador {
         return aTexto(datos.buscarHotelesPorCiudad(ciudad));
     }
 
+    /** Habitaciones del hotel libres hoy (para la noche de hoy a mañana). */
+    public List<String> habitacionesDisponiblesHoy(int idHotel)
+            throws GestionHotelesException {
+        LocalDate hoy = LocalDate.now();
+        return aTexto(datos.buscarHabitacionesDisponibles(idHotel, hoy, hoy.plusDays(1)));
+    }
+
+    /**
+     * Habitaciones de una categoría. La vista envía el nombre de la categoría
+     * ("estandar", "superior" o "suite") y aquí se traduce a la clase hija,
+     * así la vista no necesita conocer las clases del modelo.
+     */
+    public List<String> habitacionesPorCategoria(int idHotel, String categoria)
+            throws GestionHotelesException {
+        return aTexto(datos.listarHabitacionesPorCategoria(idHotel, claseDeCategoria(categoria)));
+    }
+
+    public int contarHabitacionesDisponibles(int idHotel, LocalDate entrada, LocalDate salida)
+            throws GestionHotelesException {
+        return datos.contarHabitacionesDisponibles(idHotel, entrada, salida);
+    }
+
+    // ---------- Habitaciones ----------
+
+    public void altaHabitacionEstandar(int idHotel, int id, int numero, int capacidad,
+            double precioNoche, boolean tieneEscritorio, boolean tieneMinibar)
+            throws GestionHotelesException {
+        datos.agregarHabitacion(idHotel,
+                new Estandar(id, numero, capacidad, precioNoche, tieneEscritorio, tieneMinibar));
+    }
+
+    public void altaHabitacionSuperior(int idHotel, int id, int numero, int capacidad,
+            double precioNoche, boolean tieneZonaEstar, boolean tieneVistas)
+            throws GestionHotelesException {
+        datos.agregarHabitacion(idHotel,
+                new Superior(id, numero, capacidad, precioNoche, tieneZonaEstar, tieneVistas));
+    }
+
+    public void altaHabitacionSuite(int idHotel, int id, int numero, int capacidad,
+            double precioNoche, boolean tieneSalonIndependiente, int numeroBanos)
+            throws GestionHotelesException {
+        datos.agregarHabitacion(idHotel,
+                new Suite(id, numero, capacidad, precioNoche, tieneSalonIndependiente, numeroBanos));
+    }
+
+    public List<String> listarHabitacionesHotel(int idHotel) throws GestionHotelesException {
+        return aTexto(datos.listarHabitacionesHotel(idHotel));
+    }
+
+    public List<String> buscarHabitacionesDisponibles(int idHotel, LocalDate entrada,
+            LocalDate salida) throws GestionHotelesException {
+        return aTexto(datos.buscarHabitacionesDisponibles(idHotel, entrada, salida));
+    }
+
+    public List<String> buscarHabitacionesDisponibles(int idHotel, LocalDate entrada,
+            LocalDate salida, int personas) throws GestionHotelesException {
+        return aTexto(datos.buscarHabitacionesDisponibles(idHotel, entrada, salida, personas));
+    }
+
     // ---------- Utilidad ----------
+
+    /** Traduce el nombre de una categoría a su clase hija de Habitacion. */
+    private Class<? extends Habitacion> claseDeCategoria(String categoria)
+            throws DatosInvalidosException {
+        if (categoria == null) {
+            throw new DatosInvalidosException("La categoría es obligatoria.");
+        }
+        return switch (categoria.trim().toLowerCase()) {
+            case "estandar" -> Estandar.class;
+            case "superior" -> Superior.class;
+            case "suite" -> Suite.class;
+            default -> throw new DatosInvalidosException(
+                    "Categoría no válida: usa estándar, superior o suite.");
+        };
+    }
 
     /** Convierte una lista de objetos del modelo en textos para la vista. */
     private List<String> aTexto(List<?> elementos) {
