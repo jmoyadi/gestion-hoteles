@@ -4,6 +4,9 @@ import com.databuilders.hoteles.excepciones.DatosInvalidosException;
 import com.databuilders.hoteles.excepciones.ElementoDuplicadoException;
 import com.databuilders.hoteles.excepciones.ElementoNoEncontradoException;
 import com.databuilders.hoteles.excepciones.HabitacionNoDisponibleException;
+import com.databuilders.hoteles.excepciones.OperacionNoPermitidaException;
+
+import java.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,5 +176,105 @@ public class Datos {
     public List<Reserva> consultarReservasCliente(int idCliente)
             throws ElementoNoEncontradoException {
         return clientes.buscarPorId(idCliente).getReservas();
+    }
+
+        // ---------- Modificar y eliminar clientes ----------
+
+    /**
+     * Cambia los datos de un cliente. Primero se validan todos los datos
+     * nuevos con un objeto temporal: si alguno es incorrecto se lanza la
+     * excepción y el cliente se queda como estaba, sin cambios a medias.
+     */
+    public void modificarCliente(int id, String nombre, String apellidos, String email)
+            throws ElementoNoEncontradoException, DatosInvalidosException {
+        Cliente cliente = clientes.buscarPorId(id);
+
+        Cliente validado = new Cliente(id, nombre, apellidos, email);
+
+        cliente.setNombre(validado.getNombre());
+        cliente.setApellidos(validado.getApellidos());
+        cliente.setEmail(validado.getEmail());
+    }
+
+    /**
+     * Elimina un cliente. Solo se permite si no tiene ninguna reserva, ni
+     * siquiera cancelada: es la misma restricción que pondrá la base de datos
+     * (una reserva no puede apuntar a un cliente que ya no existe).
+     */
+    public void eliminarCliente(int id)
+            throws ElementoNoEncontradoException, OperacionNoPermitidaException {
+        Cliente cliente = clientes.buscarPorId(id);
+
+        if (!cliente.getReservas().isEmpty()) {
+            throw new OperacionNoPermitidaException("No se puede eliminar al cliente "
+                    + cliente.getNombre() + " " + cliente.getApellidos()
+                    + " porque tiene reservas registradas.");
+        }
+
+        clientes.eliminar(id);
+    }
+
+    // ---------- Consultas de habitaciones ----------
+
+    /** Todas las habitaciones de un hotel, en orden de alta. */
+    public List<Habitacion> listarHabitacionesHotel(int idHotel)
+            throws ElementoNoEncontradoException {
+        return hoteles.buscarPorId(idHotel).getHabitaciones();
+    }
+
+    /** Habitaciones de un hotel libres entre dos fechas. */
+    public List<Habitacion> buscarHabitacionesDisponibles(int idHotel,
+            LocalDate entrada, LocalDate salida)
+            throws ElementoNoEncontradoException, DatosInvalidosException {
+        return hoteles.buscarPorId(idHotel).getHabitacionesDisponibles(entrada, salida);
+    }
+
+    /**
+     * Habitaciones libres entre dos fechas en las que caben al menos ese
+     * número de personas (filtro por número de personas del caso práctico).
+     */
+    public List<Habitacion> buscarHabitacionesDisponibles(int idHotel,
+            LocalDate entrada, LocalDate salida, int personas)
+            throws ElementoNoEncontradoException, DatosInvalidosException {
+        if (personas <= 0) {
+            throw new DatosInvalidosException("El número de personas debe ser positivo.");
+        }
+
+        List<Habitacion> resultado = new ArrayList<>();
+        for (Habitacion habitacion : buscarHabitacionesDisponibles(idHotel, entrada, salida)) {
+            if (habitacion.getCapacidad() >= personas) {
+                resultado.add(habitacion);
+            }
+        }
+        return resultado;
+    }
+
+    /** Número de habitaciones de un hotel libres entre dos fechas. */
+    public int contarHabitacionesDisponibles(int idHotel, LocalDate entrada, LocalDate salida)
+            throws ElementoNoEncontradoException, DatosInvalidosException {
+        return hoteles.buscarPorId(idHotel).contarHabitacionesDisponibles(entrada, salida);
+    }
+
+    /**
+     * Habitaciones de un hotel de una categoría (Estandar, Superior o Suite).
+     *
+     * Método genérico: la categoría se pasa como la propia clase hija
+     * (por ejemplo Suite.class) y el resultado ya sale con ese tipo
+     * (List<Suite>). Como la categoría ahora es una clase de la herencia y no
+     * un enumerado, se filtra con isInstance en lugar de comparar un atributo.
+     */
+    public <T extends Habitacion> List<T> listarHabitacionesPorCategoria(int idHotel,
+            Class<T> categoria) throws ElementoNoEncontradoException {
+        if (categoria == null) {
+            throw new IllegalArgumentException("La categoría no puede ser nula.");
+        }
+
+        List<T> resultado = new ArrayList<>();
+        for (Habitacion habitacion : hoteles.buscarPorId(idHotel).getHabitaciones()) {
+            if (categoria.isInstance(habitacion)) {
+                resultado.add(categoria.cast(habitacion));
+            }
+        }
+        return resultado;
     }
 }
