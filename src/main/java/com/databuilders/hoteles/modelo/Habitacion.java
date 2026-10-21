@@ -107,6 +107,15 @@ public abstract class Habitacion implements Identificable {
     }
 
     /**
+     * Quita una reserva de esta habitación (cuando se modifica una reserva y
+     * la habitación deja de estar incluida). Visibilidad de paquete: solo la
+     * llama Datos.
+     */
+    void quitarReserva(Reserva reserva) {
+        reservas.remove(reserva);
+    }
+
+    /**
      * Indica si la habitación está libre entre dos fechas.
      *
      * Está ocupada si alguna de sus reservas NO cancelada se solapa con el
@@ -119,11 +128,25 @@ public abstract class Habitacion implements Identificable {
      */
     public boolean estaDisponible(LocalDate entrada, LocalDate salida)
             throws DatosInvalidosException {
+        return estaDisponible(entrada, salida, null);
+    }
+
+    /**
+     * Igual que estaDisponible(entrada, salida), pero sin tener en cuenta una
+     * reserva concreta. Sirve al modificar una reserva: si no se ignorara a sí
+     * misma, alargarla en la misma habitación daría la habitación por ocupada.
+     * Visibilidad de paquete: solo la usa Datos.
+     */
+    boolean estaDisponible(LocalDate entrada, LocalDate salida, Reserva reservaIgnorada)
+            throws DatosInvalidosException {
         if (entrada == null || salida == null || !salida.isAfter(entrada)) {
             throw new DatosInvalidosException("Las fechas no son válidas.");
         }
 
         for (Reserva reserva : reservas) {
+            if (reserva == reservaIgnorada) {
+                continue;
+            }
             boolean activa = reserva.getEstado() != EstadoReserva.CANCELADA;
             boolean seSolapa = entrada.isBefore(reserva.getFechaSalida())
                     && salida.isAfter(reserva.getFechaEntrada());

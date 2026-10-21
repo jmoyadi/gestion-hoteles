@@ -19,7 +19,8 @@ import java.util.List;
  * Es final (no admite subclases): el constructor llama a calcularImporte()
  * y así ninguna subclase puede cambiar ese cálculo antes de terminar de construirse.
  *
- * Atributos de relación y validaciones de la reserva añadidos con ayuda de IA (Claude).
+ * Atributos de relación, validaciones y modificación de la reserva añadidos
+ * con ayuda de IA (Claude).
  */
 public final class Reserva implements Identificable {
 
@@ -46,6 +47,34 @@ public final class Reserva implements Identificable {
         if (id <= 0) {
             throw new DatosInvalidosException("El ID debe ser positivo.");
         }
+        if (cliente == null || hotel == null) {
+            throw new DatosInvalidosException(
+                    "La reserva debe tener un cliente y un hotel.");
+        }
+
+        // Reglas comunes con la modificación de la reserva
+        validar(fechaEntrada, fechaSalida, numPersonas, hotel, habitaciones);
+
+        this.id = id;
+        this.fechaEntrada = fechaEntrada;
+        this.fechaSalida = fechaSalida;
+        this.numPersonas = numPersonas;
+        this.cliente = cliente;
+        this.hotel = hotel;
+        this.habitaciones = new ArrayList<>(habitaciones);
+        this.estado = EstadoReserva.CONFIRMADA;
+
+        this.importe = calcularImporte();
+    }
+
+    /**
+     * Reglas que deben cumplir los datos de una reserva, tanto al crearla
+     * como al modificarla (nota del diagrama de clases). Están en un solo
+     * método para no escribirlas dos veces.
+     */
+    private static void validar(LocalDate fechaEntrada, LocalDate fechaSalida,
+                                int numPersonas, Hotel hotel,
+                                List<Habitacion> habitaciones) throws DatosInvalidosException {
         if (fechaEntrada == null || fechaSalida == null) {
             throw new DatosInvalidosException("Las fechas son obligatorias.");
         }
@@ -56,10 +85,6 @@ public final class Reserva implements Identificable {
         if (numPersonas <= 0) {
             throw new DatosInvalidosException(
                     "El número de personas debe ser positivo.");
-        }
-        if (cliente == null || hotel == null) {
-            throw new DatosInvalidosException(
-                    "La reserva debe tener un cliente y un hotel.");
         }
         if (habitaciones == null || habitaciones.isEmpty()) {
             throw new DatosInvalidosException(
@@ -92,16 +117,40 @@ public final class Reserva implements Identificable {
             throw new DatosInvalidosException("Las habitaciones elegidas admiten "
                     + capacidadTotal + " personas y la reserva es para " + numPersonas + ".");
         }
+    }
 
-        this.id = id;
-        this.fechaEntrada = fechaEntrada;
-        this.fechaSalida = fechaSalida;
-        this.numPersonas = numPersonas;
-        this.cliente = cliente;
-        this.hotel = hotel;
-        this.habitaciones = new ArrayList<>(habitaciones);
-        this.estado = EstadoReserva.CONFIRMADA;
+    /**
+     * Comprueba que la reserva se puede modificar con estos datos, sin cambiar
+     * nada: solo las reservas confirmadas y con las mismas reglas que al crearla.
+     * Visibilidad de paquete: la usa Datos antes de comprobar la disponibilidad.
+     */
+    void comprobarModificacion(LocalDate nuevaEntrada, LocalDate nuevaSalida,
+                               int nuevasPersonas, List<Habitacion> nuevasHabitaciones)
+            throws DatosInvalidosException, OperacionNoPermitidaException {
+        if (estado != EstadoReserva.CONFIRMADA) {
+            throw new OperacionNoPermitidaException(
+                    "Solo se pueden modificar reservas confirmadas.");
+        }
+        validar(nuevaEntrada, nuevaSalida, nuevasPersonas, hotel, nuevasHabitaciones);
+    }
 
+    /**
+     * Cambia fechas, número de personas y habitaciones, y recalcula el importe
+     * (en el diagrama de casos de uso, Modificar reserva incluye Calcular
+     * importe). El cliente y el hotel no cambian: otro hotel u otro cliente
+     * sería una reserva distinta.
+     * Visibilidad de paquete: solo la llama Datos, que antes comprueba la
+     * disponibilidad y actualiza las habitaciones.
+     */
+    void modificar(LocalDate nuevaEntrada, LocalDate nuevaSalida,
+                   int nuevasPersonas, List<Habitacion> nuevasHabitaciones)
+            throws DatosInvalidosException, OperacionNoPermitidaException {
+        comprobarModificacion(nuevaEntrada, nuevaSalida, nuevasPersonas, nuevasHabitaciones);
+
+        this.fechaEntrada = nuevaEntrada;
+        this.fechaSalida = nuevaSalida;
+        this.numPersonas = nuevasPersonas;
+        this.habitaciones = new ArrayList<>(nuevasHabitaciones);
         this.importe = calcularImporte();
     }
 

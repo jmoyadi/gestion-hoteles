@@ -135,6 +135,55 @@ public class Datos {
         reservas.buscarPorId(idReserva).cancelar();
     }
 
+    /**
+     * Modifica las fechas, el número de personas y las habitaciones de una
+     * reserva confirmada, y recalcula su importe. El cliente y el hotel no cambian.
+     *
+     * Todo se comprueba ANTES de cambiar nada (igual que en agregarReserva):
+     * si algo falla, la reserva y las habitaciones se quedan como estaban.
+     * 1. La reserva existe y está confirmada; los datos cumplen las reglas.
+     * 2. Las habitaciones son del hotel de la reserva.
+     * 3. Están libres en las nuevas fechas, sin contar la propia reserva.
+     * Después se actualizan las habitaciones que salen y las que entran, para
+     * que estaDisponible() siga dando resultados correctos.
+     */
+    public void modificarReserva(int idReserva, LocalDate nuevaEntrada, LocalDate nuevaSalida,
+                                 int nuevasPersonas, List<Integer> idsHabitaciones)
+            throws ElementoNoEncontradoException, OperacionNoPermitidaException,
+            DatosInvalidosException, HabitacionNoDisponibleException {
+        Reserva reserva = reservas.buscarPorId(idReserva);
+
+        // Habitaciones nuevas, buscadas dentro del hotel de la reserva
+        List<Habitacion> nuevas = new ArrayList<>();
+        if (idsHabitaciones != null) {
+            for (int idHabitacion : idsHabitaciones) {
+                nuevas.add(reserva.getHotel().buscarHabitacion(idHabitacion));
+            }
+        }
+
+        // Estado y reglas de la reserva (fechas, personas, repetidas, capacidad)
+        reserva.comprobarModificacion(nuevaEntrada, nuevaSalida, nuevasPersonas, nuevas);
+
+        // Disponibilidad en las nuevas fechas, ignorando esta misma reserva
+        for (Habitacion habitacion : nuevas) {
+            if (!habitacion.estaDisponible(nuevaEntrada, nuevaSalida, reserva)) {
+                throw new HabitacionNoDisponibleException("La habitación "
+                        + habitacion.getNumero() + " ya está reservada en esas fechas.");
+            }
+        }
+
+        // Solo si todo es correcto se aplican los cambios
+        for (Habitacion anterior : reserva.getHabitaciones()) {
+            if (!nuevas.contains(anterior)) {
+                anterior.quitarReserva(reserva);
+            }
+        }
+        reserva.modificar(nuevaEntrada, nuevaSalida, nuevasPersonas, nuevas);
+        for (Habitacion habitacion : nuevas) {
+            habitacion.agregarReserva(reserva);
+        }
+    }
+
     // ---------- Búsquedas por id ----------
     // Lanzan ElementoNoEncontradoException en lugar de devolver null
     // (evita NullPointerException en quien las llama).
