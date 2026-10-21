@@ -117,6 +117,23 @@ public class Datos {
         }
     }
 
+    // ---------- Operaciones sobre reservas ----------
+
+    /**
+     * Cancela una reserva.
+     *
+     * Pasa por Datos, como el resto de operaciones del modelo, para que la
+     * vista y el controlador no cambien el estado de los objetos por su cuenta.
+     * En el Producto 3 será aquí donde se guarde el cambio en la base de datos.
+     *
+     * No hace falta tocar las habitaciones: estaDisponible() ya ignora las
+     * reservas canceladas, así que quedan libres para esas fechas.
+     */
+    public void cancelarReserva(int idReserva)
+            throws ElementoNoEncontradoException, OperacionNoPermitidaException {
+        reservas.buscarPorId(idReserva).cancelar();
+    }
+
     // ---------- Búsquedas por id ----------
     // Lanzan ElementoNoEncontradoException en lugar de devolver null
     // (evita NullPointerException en quien las llama).
