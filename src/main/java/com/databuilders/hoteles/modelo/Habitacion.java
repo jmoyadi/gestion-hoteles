@@ -21,7 +21,12 @@ import java.util.List;
  */
 public abstract class Habitacion implements Identificable {
 
-    // Atributos privados comunes a todas las habitaciones
+    // Atributos privados comunes a todas las habitaciones.
+    // El número y la capacidad se fijan en el alta y no tienen setter: si se
+    // cambiaran después, podría haber dos habitaciones con el mismo número en
+    // un hotel o reservas con más personas que la capacidad, porque esas
+    // reglas solo se comprueban al dar de alta la habitación y la reserva.
+    // El precio sí se puede cambiar: el importe queda guardado en cada reserva.
     private int id;
     private int numero;
     private int capacidad;
@@ -71,20 +76,6 @@ public abstract class Habitacion implements Identificable {
         return precioNoche;
     }
 
-    public void setNumero(int numero) throws DatosInvalidosException {
-        if (numero <= 0) {
-            throw new DatosInvalidosException("El número de habitación debe ser positivo.");
-        }
-        this.numero = numero;
-    }
-
-    public void setCapacidad(int capacidad) throws DatosInvalidosException {
-        if (capacidad <= 0) {
-            throw new DatosInvalidosException("La capacidad debe ser mayor que cero.");
-        }
-        this.capacidad = capacidad;
-    }
-
     public void setPrecioNoche(double precioNoche) throws DatosInvalidosException {
         if (precioNoche < 0) {
             throw new DatosInvalidosException("El precio por noche no puede ser negativo.");
@@ -107,6 +98,15 @@ public abstract class Habitacion implements Identificable {
     }
 
     /**
+     * Quita una reserva de esta habitación (cuando se modifica una reserva y
+     * la habitación deja de estar incluida). Visibilidad de paquete: solo la
+     * llama Datos.
+     */
+    void quitarReserva(Reserva reserva) {
+        reservas.remove(reserva);
+    }
+
+    /**
      * Indica si la habitación está libre entre dos fechas.
      *
      * Está ocupada si alguna de sus reservas NO cancelada se solapa con el
@@ -119,11 +119,25 @@ public abstract class Habitacion implements Identificable {
      */
     public boolean estaDisponible(LocalDate entrada, LocalDate salida)
             throws DatosInvalidosException {
+        return estaDisponible(entrada, salida, null);
+    }
+
+    /**
+     * Igual que estaDisponible(entrada, salida), pero sin tener en cuenta una
+     * reserva concreta. Sirve al modificar una reserva: si no se ignorara a sí
+     * misma, alargarla en la misma habitación daría la habitación por ocupada.
+     * Visibilidad de paquete: solo la usa Datos.
+     */
+    boolean estaDisponible(LocalDate entrada, LocalDate salida, Reserva reservaIgnorada)
+            throws DatosInvalidosException {
         if (entrada == null || salida == null || !salida.isAfter(entrada)) {
             throw new DatosInvalidosException("Las fechas no son válidas.");
         }
 
         for (Reserva reserva : reservas) {
+            if (reserva == reservaIgnorada) {
+                continue;
+            }
             boolean activa = reserva.getEstado() != EstadoReserva.CANCELADA;
             boolean seSolapa = entrada.isBefore(reserva.getFechaSalida())
                     && salida.isAfter(reserva.getFechaEntrada());

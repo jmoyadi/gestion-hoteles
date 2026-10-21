@@ -2,6 +2,7 @@ package com.databuilders.hoteles.modelo;
 
 import com.databuilders.hoteles.excepciones.DatosInvalidosException;
 import com.databuilders.hoteles.excepciones.ElementoDuplicadoException;
+import com.databuilders.hoteles.excepciones.ElementoNoEncontradoException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -70,6 +71,18 @@ public class Hotel implements Identificable {
     /** Indica si este hotel tiene una habitación con ese id (lo usa Datos). */
     boolean tieneHabitacion(int idHabitacion) {
         return habitaciones.existe(idHabitacion);
+    }
+
+    /**
+     * Devuelve la habitación de este hotel con ese id, o lanza una excepción
+     * si no es de este hotel. Visibilidad de paquete: la usa Datos.
+     */
+    Habitacion buscarHabitacion(int idHabitacion) throws ElementoNoEncontradoException {
+        if (!habitaciones.existe(idHabitacion)) {
+            throw new ElementoNoEncontradoException("La habitación con ID " + idHabitacion
+                    + " no pertenece al hotel " + nombre + ".");
+        }
+        return habitaciones.buscarPorId(idHabitacion);
     }
 
     public List<Habitacion> getHabitacionesDisponibles(

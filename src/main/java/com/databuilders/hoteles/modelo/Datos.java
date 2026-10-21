@@ -9,6 +9,7 @@ import com.databuilders.hoteles.excepciones.OperacionNoPermitidaException;
 import java.time.LocalDate;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -117,6 +118,72 @@ public class Datos {
         }
     }
 
+    // ---------- Operaciones sobre reservas ----------
+
+    /**
+     * Cancela una reserva.
+     *
+     * Pasa por Datos, como el resto de operaciones del modelo, para que la
+     * vista y el controlador no cambien el estado de los objetos por su cuenta.
+     * En el Producto 3 será aquí donde se guarde el cambio en la base de datos.
+     *
+     * No hace falta tocar las habitaciones: estaDisponible() ya ignora las
+     * reservas canceladas, así que quedan libres para esas fechas.
+     */
+    public void cancelarReserva(int idReserva)
+            throws ElementoNoEncontradoException, OperacionNoPermitidaException {
+        reservas.buscarPorId(idReserva).cancelar();
+    }
+
+    /**
+     * Modifica las fechas, el número de personas y las habitaciones de una
+     * reserva confirmada, y recalcula su importe. El cliente y el hotel no cambian.
+     *
+     * Todo se comprueba ANTES de cambiar nada (igual que en agregarReserva):
+     * si algo falla, la reserva y las habitaciones se quedan como estaban.
+     * 1. La reserva existe y está confirmada; los datos cumplen las reglas.
+     * 2. Las habitaciones son del hotel de la reserva.
+     * 3. Están libres en las nuevas fechas, sin contar la propia reserva.
+     * Después se actualizan las habitaciones que salen y las que entran, para
+     * que estaDisponible() siga dando resultados correctos.
+     */
+    public void modificarReserva(int idReserva, LocalDate nuevaEntrada, LocalDate nuevaSalida,
+                                 int nuevasPersonas, List<Integer> idsHabitaciones)
+            throws ElementoNoEncontradoException, OperacionNoPermitidaException,
+            DatosInvalidosException, HabitacionNoDisponibleException {
+        Reserva reserva = reservas.buscarPorId(idReserva);
+
+        // Habitaciones nuevas, buscadas dentro del hotel de la reserva
+        List<Habitacion> nuevas = new ArrayList<>();
+        if (idsHabitaciones != null) {
+            for (int idHabitacion : idsHabitaciones) {
+                nuevas.add(reserva.getHotel().buscarHabitacion(idHabitacion));
+            }
+        }
+
+        // Estado y reglas de la reserva (fechas, personas, repetidas, capacidad)
+        reserva.comprobarModificacion(nuevaEntrada, nuevaSalida, nuevasPersonas, nuevas);
+
+        // Disponibilidad en las nuevas fechas, ignorando esta misma reserva
+        for (Habitacion habitacion : nuevas) {
+            if (!habitacion.estaDisponible(nuevaEntrada, nuevaSalida, reserva)) {
+                throw new HabitacionNoDisponibleException("La habitación "
+                        + habitacion.getNumero() + " ya está reservada en esas fechas.");
+            }
+        }
+
+        // Solo si todo es correcto se aplican los cambios
+        for (Habitacion anterior : reserva.getHabitaciones()) {
+            if (!nuevas.contains(anterior)) {
+                anterior.quitarReserva(reserva);
+            }
+        }
+        reserva.modificar(nuevaEntrada, nuevaSalida, nuevasPersonas, nuevas);
+        for (Habitacion habitacion : nuevas) {
+            habitacion.agregarReserva(reserva);
+        }
+    }
+
     // ---------- Búsquedas por id ----------
     // Lanzan ElementoNoEncontradoException en lugar de devolver null
     // (evita NullPointerException en quien las llama).
@@ -172,10 +239,56 @@ public class Datos {
      * (getReservas() del diagrama), que es la única fuente para este dato.
      * Lanza una excepción si el cliente no existe, para distinguir
      * "no tiene reservas" de "ese cliente no existe".
+     * Es también la búsqueda de reservas por cliente (no se duplica).
      */
     public List<Reserva> consultarReservasCliente(int idCliente)
             throws ElementoNoEncontradoException {
-        return clientes.buscarPorId(idCliente).getReservas();
+        return ordenar(clientes.buscarPorId(idCliente).getReservas());
+    }
+
+    /**
+     * Reservas de un hotel. Lanza una excepción si el hotel no existe,
+     * igual que la búsqueda por cliente.
+     */
+    public List<Reserva> buscarReservasPorHotel(int idHotel)
+            throws ElementoNoEncontradoException {
+        Hotel hotel = hoteles.buscarPorId(idHotel);
+        return ordenar(reservas.filtrar(reserva -> reserva.getHotel() == hotel));
+    }
+
+    /** Reservas cuya fecha de entrada es exactamente la indicada. */
+    public List<Reserva> buscarReservasPorFechaEntrada(LocalDate fecha) {
+        if (fecha == null) {
+            throw new IllegalArgumentException("La fecha no puede ser nula.");
+        }
+        return ordenar(reservas.filtrar(reserva -> reserva.getFechaEntrada().equals(fecha)));
+    }
+
+    /** Reservas cuya fecha de salida es exactamente la indicada. */
+    public List<Reserva> buscarReservasPorFechaSalida(LocalDate fecha) {
+        if (fecha == null) {
+            throw new IllegalArgumentException("La fecha no puede ser nula.");
+        }
+        return ordenar(reservas.filtrar(reserva -> reserva.getFechaSalida().equals(fecha)));
+    }
+
+    /** Reservas en un estado (confirmada, cancelada o finalizada). */
+    public List<Reserva> buscarReservasPorEstado(EstadoReserva estado) {
+        if (estado == null) {
+            throw new IllegalArgumentException("El estado no puede ser nulo.");
+        }
+        return ordenar(reservas.filtrar(reserva -> reserva.getEstado() == estado));
+    }
+
+    /**
+     * Ordena las reservas por fecha de entrada y, si coincide, por id, para
+     * que todas las búsquedas muestren los resultados en el mismo orden
+     * (el caso práctico pide resultados ordenados y comprensibles).
+     */
+    private List<Reserva> ordenar(List<Reserva> lista) {
+        lista.sort(Comparator.comparing(Reserva::getFechaEntrada)
+                .thenComparing(Reserva::getId));
+        return lista;
     }
 
         // ---------- Modificar y eliminar clientes ----------
