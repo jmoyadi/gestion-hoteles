@@ -9,6 +9,7 @@ import com.databuilders.hoteles.excepciones.OperacionNoPermitidaException;
 import java.time.LocalDate;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -189,10 +190,56 @@ public class Datos {
      * (getReservas() del diagrama), que es la única fuente para este dato.
      * Lanza una excepción si el cliente no existe, para distinguir
      * "no tiene reservas" de "ese cliente no existe".
+     * Es también la búsqueda de reservas por cliente (no se duplica).
      */
     public List<Reserva> consultarReservasCliente(int idCliente)
             throws ElementoNoEncontradoException {
-        return clientes.buscarPorId(idCliente).getReservas();
+        return ordenar(clientes.buscarPorId(idCliente).getReservas());
+    }
+
+    /**
+     * Reservas de un hotel. Lanza una excepción si el hotel no existe,
+     * igual que la búsqueda por cliente.
+     */
+    public List<Reserva> buscarReservasPorHotel(int idHotel)
+            throws ElementoNoEncontradoException {
+        Hotel hotel = hoteles.buscarPorId(idHotel);
+        return ordenar(reservas.filtrar(reserva -> reserva.getHotel() == hotel));
+    }
+
+    /** Reservas cuya fecha de entrada es exactamente la indicada. */
+    public List<Reserva> buscarReservasPorFechaEntrada(LocalDate fecha) {
+        if (fecha == null) {
+            throw new IllegalArgumentException("La fecha no puede ser nula.");
+        }
+        return ordenar(reservas.filtrar(reserva -> reserva.getFechaEntrada().equals(fecha)));
+    }
+
+    /** Reservas cuya fecha de salida es exactamente la indicada. */
+    public List<Reserva> buscarReservasPorFechaSalida(LocalDate fecha) {
+        if (fecha == null) {
+            throw new IllegalArgumentException("La fecha no puede ser nula.");
+        }
+        return ordenar(reservas.filtrar(reserva -> reserva.getFechaSalida().equals(fecha)));
+    }
+
+    /** Reservas en un estado (confirmada, cancelada o finalizada). */
+    public List<Reserva> buscarReservasPorEstado(EstadoReserva estado) {
+        if (estado == null) {
+            throw new IllegalArgumentException("El estado no puede ser nulo.");
+        }
+        return ordenar(reservas.filtrar(reserva -> reserva.getEstado() == estado));
+    }
+
+    /**
+     * Ordena las reservas por fecha de entrada y, si coincide, por id, para
+     * que todas las búsquedas muestren los resultados en el mismo orden
+     * (el caso práctico pide resultados ordenados y comprensibles).
+     */
+    private List<Reserva> ordenar(List<Reserva> lista) {
+        lista.sort(Comparator.comparing(Reserva::getFechaEntrada)
+                .thenComparing(Reserva::getId));
+        return lista;
     }
 
         // ---------- Modificar y eliminar clientes ----------
