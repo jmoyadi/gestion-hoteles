@@ -9,6 +9,7 @@ import com.databuilders.hoteles.modelo.Habitacion;
 import com.databuilders.hoteles.modelo.Hotel;
 import com.databuilders.hoteles.modelo.Suite;
 import com.databuilders.hoteles.modelo.Superior;
+import com.databuilders.hoteles.modelo.Reserva;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -168,4 +169,75 @@ public class Controlador {
         }
         return textos;
     }
+
+    // ==================== RESERVAS ====================
+
+    /** Devuelve todas las reservas registradas. */
+    public List<String> listarReservas() {
+        return aTexto(datos.listarReservas());
+    }
+
+    /** Busca una reserva por su identificador. */
+    public List<String> buscarReservaPorId(int idReserva)
+            throws GestionHotelesException {
+        return aTexto(List.of(datos.buscarReservaPorId(idReserva)));
+    }
+
+    /** Crea y registra una reserva. */
+    public void altaReserva(
+            int idReserva,
+            int idCliente,
+            int idHotel,
+            LocalDate fechaEntrada,
+            LocalDate fechaSalida,
+            int numPersonas,
+            List<Integer> idsHabitaciones
+    ) throws GestionHotelesException {
+
+        Cliente cliente = datos.buscarClientePorId(idCliente);
+        Hotel hotel = datos.buscarHotelPorId(idHotel);
+
+        List<Habitacion> habitacionesHotel = hotel.getHabitaciones();
+        List<Habitacion> habitacionesReserva = new ArrayList<>();
+
+        for (int idHabitacion : idsHabitaciones) {
+            Habitacion encontrada = null;
+
+            for (Habitacion habitacion : habitacionesHotel) {
+                if (habitacion.getId() == idHabitacion) {
+                    encontrada = habitacion;
+                    break;
+                }
+            }
+
+            if (encontrada == null) {
+                throw new DatosInvalidosException(
+                        "La habitación con ID " + idHabitacion
+                                + " no pertenece al hotel seleccionado."
+                );
+            }
+
+            habitacionesReserva.add(encontrada);
+        }
+
+        Reserva reserva = new Reserva(
+                idReserva,
+                fechaEntrada,
+                fechaSalida,
+                numPersonas,
+                cliente,
+                hotel,
+                habitacionesReserva
+        );
+
+        datos.agregarReserva(reserva);
+    }
+
+    /** Cancela una reserva existente. */
+    public void cancelarReserva(int idReserva)
+            throws GestionHotelesException {
+        Reserva reserva = datos.buscarReservaPorId(idReserva);
+        reserva.cancelar();
+    }
+
 }

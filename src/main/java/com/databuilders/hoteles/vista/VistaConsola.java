@@ -53,7 +53,7 @@ public class VistaConsola {
                 case 1 -> menuClientes();
                 case 2 -> menuHoteles();
                 case 3 -> menuHabitaciones();
-                case 4 -> System.out.println("La gestión de reservas está pendiente de implementar.");
+                case 4 -> menuReservas();
                 case 0 -> System.out.println("Saliendo del programa...");
                 default -> System.out.println("Opción no válida.");
             }
@@ -177,6 +177,106 @@ public class VistaConsola {
             }
         } while (opcion != 0);
     }
+
+    // ==================== RESERVAS ====================
+
+    private void menuReservas() {
+        int opcion;
+
+        do {
+            System.out.println("\n----- RESERVAS -----");
+            System.out.println("1. Listar reservas");
+            System.out.println("2. Consultar reserva por ID");
+            System.out.println("3. Crear reserva");
+            System.out.println("4. Cancelar reserva");
+            System.out.println("0. Volver");
+
+            opcion = leerEntero("Selecciona una opción: ");
+
+            try {
+                switch (opcion) {
+                    case 1 -> mostrarLista(
+                            "Reservas registradas",
+                            controlador.listarReservas()
+                    );
+
+                    case 2 -> {
+                        int id = leerEntero("ID de la reserva: ");
+                        mostrarLista(
+                                "Reserva consultada",
+                                controlador.buscarReservaPorId(id)
+                        );
+                    }
+
+                    case 3 -> altaReserva();
+
+                    case 4 -> {
+                        int id = leerEntero("ID de la reserva que quieres cancelar: ");
+
+                        if (leerSiNo("¿Seguro que quieres cancelar esta reserva? (s/n): ")) {
+                            controlador.cancelarReserva(id);
+                            System.out.println("Reserva cancelada correctamente.");
+                        } else {
+                            System.out.println("Operación cancelada.");
+                        }
+                    }
+
+                    case 0 -> { }
+
+                    default -> System.out.println("Opción no válida.");
+                }
+            } catch (GestionHotelesException e) {
+                mostrarError(e);
+            }
+
+        } while (opcion != 0);
+    }
+
+
+    /** Pide los datos necesarios para crear una reserva. */
+    private void altaReserva() throws GestionHotelesException {
+        int idReserva = leerEntero("ID de la reserva: ");
+        int idCliente = leerEntero("ID del cliente: ");
+        int idHotel = leerEntero("ID del hotel: ");
+
+        LocalDate entrada = leerFecha("Fecha de entrada (dd/mm/aaaa): ");
+        LocalDate salida = leerFecha("Fecha de salida (dd/mm/aaaa): ");
+
+        int personas = leerEntero("Número de personas: ");
+
+        List<Integer> idsHabitaciones = new java.util.ArrayList<>();
+
+        System.out.println("Introduce los ID de las habitaciones que quieres reservar.");
+        System.out.println("Escribe 0 cuando hayas terminado.");
+
+        while (true) {
+            int idHabitacion = leerEntero("ID de habitación: ");
+
+            if (idHabitacion == 0) {
+                break;
+            }
+
+            idsHabitaciones.add(idHabitacion);
+        }
+
+        if (idsHabitaciones.isEmpty()) {
+            System.out.println("Debes seleccionar al menos una habitación.");
+            return;
+        }
+
+        controlador.altaReserva(
+                idReserva,
+                idCliente,
+                idHotel,
+                entrada,
+                salida,
+                personas,
+                idsHabitaciones
+        );
+
+        System.out.println("Reserva creada correctamente.");
+    }
+
 
     // ==================== HABITACIONES ====================
 
