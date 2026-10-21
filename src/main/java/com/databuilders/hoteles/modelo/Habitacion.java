@@ -21,7 +21,12 @@ import java.util.List;
  */
 public abstract class Habitacion implements Identificable {
 
-    // Atributos privados comunes a todas las habitaciones
+    // Atributos privados comunes a todas las habitaciones.
+    // El número y la capacidad se fijan en el alta y no tienen setter: si se
+    // cambiaran después, podría haber dos habitaciones con el mismo número en
+    // un hotel o reservas con más personas que la capacidad, porque esas
+    // reglas solo se comprueban al dar de alta la habitación y la reserva.
+    // El precio sí se puede cambiar: el importe queda guardado en cada reserva.
     private int id;
     private int numero;
     private int capacidad;
@@ -69,20 +74,6 @@ public abstract class Habitacion implements Identificable {
 
     public double getPrecioNoche() {
         return precioNoche;
-    }
-
-    public void setNumero(int numero) throws DatosInvalidosException {
-        if (numero <= 0) {
-            throw new DatosInvalidosException("El número de habitación debe ser positivo.");
-        }
-        this.numero = numero;
-    }
-
-    public void setCapacidad(int capacidad) throws DatosInvalidosException {
-        if (capacidad <= 0) {
-            throw new DatosInvalidosException("La capacidad debe ser mayor que cero.");
-        }
-        this.capacidad = capacidad;
     }
 
     public void setPrecioNoche(double precioNoche) throws DatosInvalidosException {
