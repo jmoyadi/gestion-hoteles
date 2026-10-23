@@ -4,6 +4,7 @@ import com.databuilders.hoteles.excepciones.DatosInvalidosException;
 import com.databuilders.hoteles.excepciones.GestionHotelesException;
 import com.databuilders.hoteles.modelo.Cliente;
 import com.databuilders.hoteles.modelo.Datos;
+import com.databuilders.hoteles.modelo.EstadoReserva;
 import com.databuilders.hoteles.modelo.Estandar;
 import com.databuilders.hoteles.modelo.Habitacion;
 import com.databuilders.hoteles.modelo.Hotel;
@@ -233,11 +234,63 @@ public class Controlador {
         datos.agregarReserva(reserva);
     }
 
-    /** Cancela una reserva existente. */
+    /**
+     * Cancela una reserva. La operación la hace Datos, como el resto de
+     * cambios en el modelo: el controlador solo pasa el id.
+     */
     public void cancelarReserva(int idReserva)
             throws GestionHotelesException {
-        Reserva reserva = datos.buscarReservaPorId(idReserva);
-        reserva.cancelar();
+        datos.cancelarReserva(idReserva);
+    }
+
+    /**
+     * Modifica las fechas, el número de personas y las habitaciones de una
+     * reserva confirmada. Las comprobaciones y el nuevo importe los hace Datos;
+     * si algo falla, la reserva se queda como estaba.
+     */
+    public void modificarReserva(int idReserva, LocalDate entrada, LocalDate salida,
+            int personas, List<Integer> idsHabitaciones) throws GestionHotelesException {
+        datos.modificarReserva(idReserva, entrada, salida, personas, idsHabitaciones);
+    }
+
+    // Búsqueda de reservas por criterio (caso de uso «Buscar reservas»).
+    // La búsqueda por cliente es consultarReservasCliente(), en Clientes.
+
+    public List<String> buscarReservasPorHotel(int idHotel)
+            throws GestionHotelesException {
+        return aTexto(datos.buscarReservasPorHotel(idHotel));
+    }
+
+    public List<String> buscarReservasPorFechaEntrada(LocalDate fecha) {
+        return aTexto(datos.buscarReservasPorFechaEntrada(fecha));
+    }
+
+    public List<String> buscarReservasPorFechaSalida(LocalDate fecha) {
+        return aTexto(datos.buscarReservasPorFechaSalida(fecha));
+    }
+
+    /**
+     * Reservas en un estado. La vista envía el estado como texto
+     * ("confirmada", "cancelada" o "finalizada") y aquí se traduce al
+     * enumerado, así la vista no necesita conocer las clases del modelo.
+     */
+    public List<String> buscarReservasPorEstado(String estado)
+            throws GestionHotelesException {
+        return aTexto(datos.buscarReservasPorEstado(estadoDeTexto(estado)));
+    }
+
+    /** Traduce el nombre de un estado a su valor de EstadoReserva. */
+    private EstadoReserva estadoDeTexto(String estado) throws DatosInvalidosException {
+        if (estado == null) {
+            throw new DatosInvalidosException("El estado es obligatorio.");
+        }
+        return switch (estado.trim().toLowerCase()) {
+            case "confirmada" -> EstadoReserva.CONFIRMADA;
+            case "cancelada" -> EstadoReserva.CANCELADA;
+            case "finalizada" -> EstadoReserva.FINALIZADA;
+            default -> throw new DatosInvalidosException(
+                    "Estado no válido: usa confirmada, cancelada o finalizada.");
+        };
     }
 
 }

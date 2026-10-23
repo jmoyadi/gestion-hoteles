@@ -210,8 +210,13 @@ public class Datos {
         return hoteles.listar();
     }
 
+    /**
+     * Todas las reservas, ordenadas por fecha de entrada (el caso práctico
+     * pide resultados ordenados). Se ordena una copia: el repositorio
+     * mantiene el orden de alta.
+     */
     public List<Reserva> listarReservas() {
-        return reservas.listar();
+        return ordenar(new ArrayList<>(reservas.listar()));
     }
 
     // ---------- Búsquedas por criterio ----------
