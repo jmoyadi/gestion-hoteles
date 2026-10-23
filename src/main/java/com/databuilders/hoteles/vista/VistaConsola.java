@@ -278,7 +278,11 @@ public class VistaConsola {
         }
     }
 
-    /** Pide los datos necesarios para crear una reserva. */
+    /**
+     * Pide los datos necesarios para crear una reserva, en el orden que
+     * describe el caso práctico: cliente, hotel, fechas, habitaciones
+     * disponibles, número de personas y habitaciones elegidas.
+     */
     private void altaReserva() throws GestionHotelesException {
         int idReserva = leerEntero("ID de la reserva: ");
         int idCliente = leerEntero("ID del cliente: ");
@@ -286,6 +290,17 @@ public class VistaConsola {
 
         LocalDate entrada = leerFecha("Fecha de entrada (dd/mm/aaaa): ");
         LocalDate salida = leerFecha("Fecha de salida (dd/mm/aaaa): ");
+
+        // Se muestran las habitaciones libres para elegir viéndolas. Si el hotel
+        // no existe o las fechas no son válidas, el error sale aquí, antes de
+        // pedir el resto de datos.
+        List<String> disponibles =
+                controlador.buscarHabitacionesDisponibles(idHotel, entrada, salida);
+        if (disponibles.isEmpty()) {
+            System.out.println("No hay habitaciones disponibles en esas fechas.");
+            return;
+        }
+        mostrarLista("Habitaciones disponibles en esas fechas", disponibles);
 
         int personas = leerEntero("Número de personas: ");
 

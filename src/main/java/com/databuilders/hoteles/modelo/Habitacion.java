@@ -154,8 +154,10 @@ public abstract class Habitacion implements Identificable {
      */
     @Override
     public String toString() {
-        return String.format("Hab. %d · %d persona(s) · %.2f €/noche",
-                numero, capacidad, precioNoche);
+        // El id va delante, como en Cliente, Hotel y Reserva: es el dato que se
+        // pide al reservar (el número de puerta se repite entre hoteles)
+        return String.format("[%d] Hab. %d · %d persona(s) · %.2f €/noche",
+                getId(), numero, capacidad, precioNoche);
     }
 
     /** Convierte un booleano en «sí» o «no» para mostrarlo al usuario. */
