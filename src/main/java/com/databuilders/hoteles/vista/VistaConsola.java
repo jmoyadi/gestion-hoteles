@@ -189,6 +189,7 @@ public class VistaConsola {
             System.out.println("2. Consultar reserva por ID");
             System.out.println("3. Crear reserva");
             System.out.println("4. Cancelar reserva");
+            System.out.println("5. Buscar reservas");
             System.out.println("0. Volver");
 
             opcion = leerEntero("Selecciona una opción: ");
@@ -221,6 +222,8 @@ public class VistaConsola {
                         }
                     }
 
+                    case 5 -> buscarReservas();
+
                     case 0 -> { }
 
                     default -> System.out.println("Opción no válida.");
@@ -232,6 +235,44 @@ public class VistaConsola {
         } while (opcion != 0);
     }
 
+
+    /**
+     * Busca reservas por un criterio (cliente, hotel, fecha de entrada,
+     * fecha de salida o estado), como en el caso de uso «Buscar reservas».
+     * Los resultados llegan ordenados por fecha de entrada.
+     */
+    private void buscarReservas() throws GestionHotelesException {
+        System.out.println("Buscar por: 1. Cliente  2. Hotel  3. Fecha de entrada"
+                + "  4. Fecha de salida  5. Estado");
+        switch (leerEntero("Elige el criterio: ")) {
+            case 1 -> {
+                int idCliente = leerEntero("ID del cliente: ");
+                mostrarLista("Reservas del cliente",
+                        controlador.consultarReservasCliente(idCliente));
+            }
+            case 2 -> {
+                int idHotel = leerEntero("ID del hotel: ");
+                mostrarLista("Reservas del hotel",
+                        controlador.buscarReservasPorHotel(idHotel));
+            }
+            case 3 -> {
+                LocalDate fecha = leerFecha("Fecha de entrada (dd/mm/aaaa): ");
+                mostrarLista("Reservas con entrada el " + fecha.format(FORMATO_FECHA),
+                        controlador.buscarReservasPorFechaEntrada(fecha));
+            }
+            case 4 -> {
+                LocalDate fecha = leerFecha("Fecha de salida (dd/mm/aaaa): ");
+                mostrarLista("Reservas con salida el " + fecha.format(FORMATO_FECHA),
+                        controlador.buscarReservasPorFechaSalida(fecha));
+            }
+            case 5 -> {
+                String estado = leerEstado();
+                mostrarLista("Reservas en estado " + estado,
+                        controlador.buscarReservasPorEstado(estado));
+            }
+            default -> System.out.println("Criterio no válido.");
+        }
+    }
 
     /** Pide los datos necesarios para crear una reserva. */
     private void altaReserva() throws GestionHotelesException {
@@ -411,6 +452,19 @@ public class VistaConsola {
                 case 2 -> { return "superior"; }
                 case 3 -> { return "suite"; }
                 default -> System.out.println("Categoría no válida.");
+            }
+        }
+    }
+
+    /** Pide el estado de una reserva y lo devuelve como texto para el controlador. */
+    private String leerEstado() {
+        while (true) {
+            System.out.println("Estado: 1. Confirmada  2. Cancelada  3. Finalizada");
+            switch (leerEntero("Elige el estado: ")) {
+                case 1 -> { return "confirmada"; }
+                case 2 -> { return "cancelada"; }
+                case 3 -> { return "finalizada"; }
+                default -> System.out.println("Estado no válido.");
             }
         }
     }
