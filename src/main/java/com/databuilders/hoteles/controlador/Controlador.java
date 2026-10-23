@@ -62,6 +62,15 @@ public class Controlador {
         return aTexto(datos.consultarReservasCliente(idCliente));
     }
 
+    /**
+     * Busca un cliente por su id. La vista lo usa para mostrar el cliente antes
+     * de modificarlo o eliminarlo; si no existe, el error sale antes de pedir
+     * nada más.
+     */
+    public List<String> buscarClientePorId(int id) throws GestionHotelesException {
+        return aTexto(List.of(datos.buscarClientePorId(id)));
+    }
+
     public void modificarCliente(int id, String nombre, String apellidos, String email)
             throws GestionHotelesException {
         datos.modificarCliente(id, nombre, apellidos, email);

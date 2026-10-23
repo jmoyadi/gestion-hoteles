@@ -94,6 +94,9 @@ public class VistaConsola {
                     }
                     case 4 -> {
                         int id = leerEntero("ID del cliente a modificar: ");
+                        // Se muestra el cliente: si el id no existe, el error sale
+                        // aquí y no se piden los datos nuevos.
+                        mostrarLista("Cliente actual", controlador.buscarClientePorId(id));
                         String nombre = leerTexto("Nuevo nombre: ");
                         String apellidos = leerTexto("Nuevos apellidos: ");
                         String email = leerTexto("Nuevo email: ");
@@ -102,6 +105,8 @@ public class VistaConsola {
                     }
                     case 5 -> {
                         int id = leerEntero("ID del cliente a eliminar: ");
+                        // Se comprueba que existe antes de pedir la confirmación.
+                        mostrarLista("Cliente a eliminar", controlador.buscarClientePorId(id));
                         if (leerSiNo("¿Seguro que quieres eliminarlo? (s/n): ")) {
                             controlador.eliminarCliente(id);
                             System.out.println("Cliente eliminado correctamente.");
@@ -215,6 +220,8 @@ public class VistaConsola {
 
                     case 4 -> {
                         int id = leerEntero("ID de la reserva que quieres cancelar: ");
+                        // Se comprueba que existe antes de pedir la confirmación.
+                        mostrarLista("Reserva a cancelar", controlador.buscarReservaPorId(id));
 
                         if (leerSiNo("¿Seguro que quieres cancelar esta reserva? (s/n): ")) {
                             controlador.cancelarReserva(id);
@@ -405,6 +412,10 @@ public class VistaConsola {
 
     private void altaHabitacion() throws GestionHotelesException {
         int idHotel = leerEntero("ID del hotel: ");
+        // Se muestran las habitaciones que ya tiene el hotel: si el hotel no
+        // existe, el error sale aquí, y si existe, se ven los id y números ya
+        // ocupados antes de elegir los nuevos.
+        mostrarLista("Habitaciones actuales del hotel", controlador.listarHabitacionesHotel(idHotel));
         String categoria = leerCategoria();
         int id = leerEntero("ID de la habitación (único en la cadena): ");
         int numero = leerEntero("Número de habitación: ");
