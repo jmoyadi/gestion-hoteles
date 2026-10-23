@@ -243,6 +243,16 @@ public class Controlador {
         datos.cancelarReserva(idReserva);
     }
 
+    /**
+     * Modifica las fechas, el número de personas y las habitaciones de una
+     * reserva confirmada. Las comprobaciones y el nuevo importe los hace Datos;
+     * si algo falla, la reserva se queda como estaba.
+     */
+    public void modificarReserva(int idReserva, LocalDate entrada, LocalDate salida,
+            int personas, List<Integer> idsHabitaciones) throws GestionHotelesException {
+        datos.modificarReserva(idReserva, entrada, salida, personas, idsHabitaciones);
+    }
+
     // Búsqueda de reservas por criterio (caso de uso «Buscar reservas»).
     // La búsqueda por cliente es consultarReservasCliente(), en Clientes.
 

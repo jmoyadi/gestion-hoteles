@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -190,6 +191,7 @@ public class VistaConsola {
             System.out.println("3. Crear reserva");
             System.out.println("4. Cancelar reserva");
             System.out.println("5. Buscar reservas");
+            System.out.println("6. Modificar reserva");
             System.out.println("0. Volver");
 
             opcion = leerEntero("Selecciona una opción: ");
@@ -223,6 +225,8 @@ public class VistaConsola {
                     }
 
                     case 5 -> buscarReservas();
+
+                    case 6 -> modificarReserva();
 
                     case 0 -> { }
 
@@ -285,20 +289,7 @@ public class VistaConsola {
 
         int personas = leerEntero("Número de personas: ");
 
-        List<Integer> idsHabitaciones = new java.util.ArrayList<>();
-
-        System.out.println("Introduce los ID de las habitaciones que quieres reservar.");
-        System.out.println("Escribe 0 cuando hayas terminado.");
-
-        while (true) {
-            int idHabitacion = leerEntero("ID de habitación: ");
-
-            if (idHabitacion == 0) {
-                break;
-            }
-
-            idsHabitaciones.add(idHabitacion);
-        }
+        List<Integer> idsHabitaciones = leerIdsHabitaciones();
 
         if (idsHabitaciones.isEmpty()) {
             System.out.println("Debes seleccionar al menos una habitación.");
@@ -316,6 +307,54 @@ public class VistaConsola {
         );
 
         System.out.println("Reserva creada correctamente.");
+    }
+
+    /**
+     * Modifica una reserva confirmada. Primero muestra la reserva actual (si el
+     * id no existe, el error sale aquí y no se pide nada más) y después pide
+     * todos los datos nuevos. El cliente y el hotel no se pueden cambiar.
+     */
+    private void modificarReserva() throws GestionHotelesException {
+        int idReserva = leerEntero("ID de la reserva que quieres modificar: ");
+        mostrarLista("Reserva actual", controlador.buscarReservaPorId(idReserva));
+
+        System.out.println("Introduce los datos nuevos (el cliente y el hotel no se pueden cambiar).");
+        LocalDate entrada = leerFecha("Nueva fecha de entrada (dd/mm/aaaa): ");
+        LocalDate salida = leerFecha("Nueva fecha de salida (dd/mm/aaaa): ");
+        int personas = leerEntero("Número de personas: ");
+
+        List<Integer> idsHabitaciones = leerIdsHabitaciones();
+
+        if (idsHabitaciones.isEmpty()) {
+            System.out.println("Debes seleccionar al menos una habitación.");
+            return;
+        }
+
+        controlador.modificarReserva(idReserva, entrada, salida, personas, idsHabitaciones);
+        System.out.println("Reserva modificada correctamente.");
+    }
+
+    /**
+     * Pide los ID de las habitaciones hasta que el usuario escribe 0.
+     * Lo usan el alta y la modificación de reservas.
+     */
+    private List<Integer> leerIdsHabitaciones() {
+        List<Integer> idsHabitaciones = new ArrayList<>();
+
+        System.out.println("Introduce los ID de las habitaciones que quieres reservar.");
+        System.out.println("Escribe 0 cuando hayas terminado.");
+
+        while (true) {
+            int idHabitacion = leerEntero("ID de habitación: ");
+
+            if (idHabitacion == 0) {
+                break;
+            }
+
+            idsHabitaciones.add(idHabitacion);
+        }
+
+        return idsHabitaciones;
     }
 
 
