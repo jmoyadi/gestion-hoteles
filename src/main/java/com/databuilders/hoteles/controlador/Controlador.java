@@ -233,11 +233,13 @@ public class Controlador {
         datos.agregarReserva(reserva);
     }
 
-    /** Cancela una reserva existente. */
+    /**
+     * Cancela una reserva. La operación la hace Datos, como el resto de
+     * cambios en el modelo: el controlador solo pasa el id.
+     */
     public void cancelarReserva(int idReserva)
             throws GestionHotelesException {
-        Reserva reserva = datos.buscarReservaPorId(idReserva);
-        reserva.cancelar();
+        datos.cancelarReserva(idReserva);
     }
 
 }
