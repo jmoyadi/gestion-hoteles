@@ -101,25 +101,21 @@ public class ReservaController {
         return aTexto(datos.buscarReservasPorHotel(idHotel));
     }
 
-    public List<String> buscarReservasPorFechaEntrada(LocalDate fecha)
-            throws GestionHotelesException {
+    public List<String> buscarReservasPorFechaEntrada(LocalDate fecha) {
         return aTexto(datos.buscarReservasPorFechaEntrada(fecha));
     }
 
-    public List<String> buscarReservasPorFechaSalida(LocalDate fecha)
-            throws GestionHotelesException {
+    public List<String> buscarReservasPorFechaSalida(LocalDate fecha) {
         return aTexto(datos.buscarReservasPorFechaSalida(fecha));
     }
 
-    public List<String> buscarReservasPorEstado(String estado)
-            throws GestionHotelesException {
+    public List<String> buscarReservasPorEstado(String estado) {
 
         EstadoReserva estadoReserva = estadoDeTexto(estado);
         return aTexto(datos.buscarReservasPorEstado(estadoReserva));
     }
 
-    private EstadoReserva estadoDeTexto(String estado)
-            throws GestionHotelesException {
+    private EstadoReserva estadoDeTexto(String estado) {
 
         if (estado == null) {
             throw new IllegalArgumentException("El estado no puede ser nulo.");

@@ -75,7 +75,7 @@ public class HabitacionView {
         int id = leerEntero("ID de la habitación (único en la cadena): ");
         int numero = leerEntero("Número de habitación: ");
         int capacidad = leerEntero("Capacidad (personas): ");
-        double precio = leerDecimal("Precio por noche (€): ");
+        double precio = leerDecimal();
 
         switch (categoria) {
             case "estandar" -> controlador.altaHabitacionEstandar(
@@ -129,9 +129,9 @@ public class HabitacionView {
         }
     }
 
-    private double leerDecimal(String mensaje) {
+    private double leerDecimal() {
         while (true) {
-            System.out.print(mensaje);
+            System.out.print("Precio por noche (€): ");
 
             try {
                 return Double.parseDouble(
@@ -142,6 +142,7 @@ public class HabitacionView {
             }
         }
     }
+
 
     private String leerTexto(String mensaje) {
         System.out.print(mensaje);

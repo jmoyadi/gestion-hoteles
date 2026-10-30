@@ -76,18 +76,16 @@ public class HotelController {
         return hotel.contarHabitacionesDisponibles(entrada, salida);
     }
 
+
     private Class<? extends Habitacion> claseDeCategoria(String categoria) {
-        switch (categoria.toUpperCase()) {
-            case "ESTANDAR":
-                return Estandar.class;
-            case "SUPERIOR":
-                return Superior.class;
-            case "SUITE":
-                return Suite.class;
-            default:
-                throw new IllegalArgumentException("Categoría no válida.");
-        }
+        return switch (categoria.toUpperCase()) {
+            case "ESTANDAR" -> Estandar.class;
+            case "SUPERIOR" -> Superior.class;
+            case "SUITE" -> Suite.class;
+            default -> throw new IllegalArgumentException("Categoría no válida.");
+        };
     }
+
 
     private List<String> aTexto(List<?> elementos) {
         List<String> textos = new ArrayList<>();

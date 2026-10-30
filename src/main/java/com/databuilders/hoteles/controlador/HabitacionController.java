@@ -4,7 +4,6 @@ package com.databuilders.hoteles.controlador;
 import com.databuilders.hoteles.excepciones.GestionHotelesException;
 import com.databuilders.hoteles.modelo.Datos;
 import com.databuilders.hoteles.modelo.Estandar;
-import com.databuilders.hoteles.modelo.Habitacion;
 import com.databuilders.hoteles.modelo.Suite;
 import com.databuilders.hoteles.modelo.Superior;
 

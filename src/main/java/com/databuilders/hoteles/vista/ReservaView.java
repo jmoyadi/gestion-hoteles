@@ -133,6 +133,7 @@ public class ReservaView {
         System.out.println("Reserva creada correctamente.");
     }
 
+
     private void cancelarReserva() throws GestionHotelesException {
         int id = leerEntero(
                 "ID de la reserva que quieres cancelar: ");
@@ -141,16 +142,14 @@ public class ReservaView {
                 "Reserva a cancelar",
                 controlador.buscarReservaPorId(id));
 
-        if (leerSiNo(
-                "¿Seguro que quieres cancelar esta reserva? (s/n): ")) {
-
+        if (leerSiNo()) {
             controlador.cancelarReserva(id);
             System.out.println("Reserva cancelada correctamente.");
-
         } else {
             System.out.println("Operación cancelada.");
         }
     }
+
 
     private void buscarReservas() throws GestionHotelesException {
         System.out.println(
@@ -283,25 +282,26 @@ public class ReservaView {
         return teclado.nextLine().trim();
     }
 
-    private boolean leerSiNo(String mensaje) {
-        while (true) {
-            String respuesta =
-                    leerTexto(mensaje).toLowerCase();
 
-            if (respuesta.equals("s")
-                    || respuesta.equals("si")
+    private boolean leerSiNo() {
+        while (true) {
+            String respuesta = leerTexto(
+                    "¿Seguro que quieres cancelar esta reserva? (s/n): "
+            ).toLowerCase();
+
+            if (respuesta.equals("s") || respuesta.equals("si")
                     || respuesta.equals("sí")) {
                 return true;
             }
 
-            if (respuesta.equals("n")
-                    || respuesta.equals("no")) {
+            if (respuesta.equals("n") || respuesta.equals("no")) {
                 return false;
             }
 
             System.out.println("Responde s o n.");
         }
     }
+
 
     private LocalDate leerFecha(String mensaje) {
         while (true) {
