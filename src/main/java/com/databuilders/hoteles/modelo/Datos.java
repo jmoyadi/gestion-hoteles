@@ -31,7 +31,16 @@ public class Datos {
 
     private final Repositorio<Cliente> clientes = new Repositorio<>("un cliente");
     private final Repositorio<Hotel> hoteles = new Repositorio<>("un hotel");
-    private final Repositorio<Reserva> reservas = new Repositorio<>("una reserva");
+
+    private List<Reserva> obtenerTodasLasReservas() {
+        List<Reserva> resultado = new ArrayList<>();
+
+        for (Cliente cliente : clientes.listar()) {
+            resultado.addAll(cliente.getReservas());
+        }
+
+        return resultado;
+    }
 
     // ---------- Altas ----------
 
@@ -85,9 +94,11 @@ public class Datos {
             throw new IllegalArgumentException("La reserva no puede ser nula.");
         }
 
-        if (reservas.existe(reserva.getId())) {
-            throw new ElementoDuplicadoException(
-                    "Ya existe una reserva con el ID " + reserva.getId() + ".");
+        for (Reserva existente : obtenerTodasLasReservas()) {
+            if (existente.getId() == reserva.getId()) {
+                throw new ElementoDuplicadoException(
+                        "Ya existe una reserva con el ID " + reserva.getId() + ".");
+            }
         }
 
         // El cliente y el hotel tienen que ser los mismos objetos dados de alta
@@ -110,7 +121,6 @@ public class Datos {
         }
 
         // Solo si todo es correcto se registra la reserva
-        reservas.agregar(reserva);
         reserva.getCliente().agregarReserva(reserva);
         // La habitación también guarda la reserva para poder calcular su disponibilidad
         for (Habitacion habitacion : reserva.getHabitaciones()) {
@@ -132,7 +142,7 @@ public class Datos {
      */
     public void cancelarReserva(int idReserva)
             throws ElementoNoEncontradoException, OperacionNoPermitidaException {
-        reservas.buscarPorId(idReserva).cancelar();
+        buscarReservaPorId(idReserva).cancelar();
     }
 
     /**
@@ -151,7 +161,7 @@ public class Datos {
                                  int nuevasPersonas, List<Integer> idsHabitaciones)
             throws ElementoNoEncontradoException, OperacionNoPermitidaException,
             DatosInvalidosException, HabitacionNoDisponibleException {
-        Reserva reserva = reservas.buscarPorId(idReserva);
+        Reserva reserva = buscarReservaPorId(idReserva);
 
         // Habitaciones nuevas, buscadas dentro del hotel de la reserva
         List<Habitacion> nuevas = new ArrayList<>();
@@ -197,9 +207,14 @@ public class Datos {
     }
 
     public Reserva buscarReservaPorId(int id) throws ElementoNoEncontradoException {
-        return reservas.buscarPorId(id);
-    }
+        for (Reserva reserva : obtenerTodasLasReservas()) {
+            if (reserva.getId() == id) {
+                return reserva;
+            }
+        }
 
+        throw new ElementoNoEncontradoException("No se ha encontrado una reserva con ID " + id + ".");
+    }
     // ---------- Listados (en orden de alta, no modificables) ----------
 
     public List<Cliente> listarClientes() {
@@ -216,7 +231,7 @@ public class Datos {
      * mantiene el orden de alta.
      */
     public List<Reserva> listarReservas() {
-        return ordenar(new ArrayList<>(reservas.listar()));
+        return ordenar(obtenerTodasLasReservas());
     }
 
     // ---------- Búsquedas por criterio ----------
@@ -258,7 +273,11 @@ public class Datos {
     public List<Reserva> buscarReservasPorHotel(int idHotel)
             throws ElementoNoEncontradoException {
         Hotel hotel = hoteles.buscarPorId(idHotel);
-        return ordenar(reservas.filtrar(reserva -> reserva.getHotel() == hotel));
+
+        List<Reserva> resultado = obtenerTodasLasReservas();
+        resultado.removeIf(reserva -> reserva.getHotel() != hotel);
+
+        return ordenar(resultado);
     }
 
     /** Reservas cuya fecha de entrada es exactamente la indicada. */
@@ -266,7 +285,11 @@ public class Datos {
         if (fecha == null) {
             throw new IllegalArgumentException("La fecha no puede ser nula.");
         }
-        return ordenar(reservas.filtrar(reserva -> reserva.getFechaEntrada().equals(fecha)));
+
+        List<Reserva> resultado = obtenerTodasLasReservas();
+        resultado.removeIf(reserva -> !reserva.getFechaEntrada().equals(fecha));
+
+        return ordenar(resultado);
     }
 
     /** Reservas cuya fecha de salida es exactamente la indicada. */
@@ -274,7 +297,11 @@ public class Datos {
         if (fecha == null) {
             throw new IllegalArgumentException("La fecha no puede ser nula.");
         }
-        return ordenar(reservas.filtrar(reserva -> reserva.getFechaSalida().equals(fecha)));
+
+        List<Reserva> resultado = obtenerTodasLasReservas();
+        resultado.removeIf(reserva -> !reserva.getFechaSalida().equals(fecha));
+
+        return ordenar(resultado);
     }
 
     /** Reservas en un estado (confirmada, cancelada o finalizada). */
@@ -282,7 +309,11 @@ public class Datos {
         if (estado == null) {
             throw new IllegalArgumentException("El estado no puede ser nulo.");
         }
-        return ordenar(reservas.filtrar(reserva -> reserva.getEstado() == estado));
+
+        List<Reserva> resultado = obtenerTodasLasReservas();
+        resultado.removeIf(reserva -> reserva.getEstado() != estado);
+
+        return ordenar(resultado);
     }
 
     /**
