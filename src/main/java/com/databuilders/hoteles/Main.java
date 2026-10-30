@@ -1,16 +1,21 @@
 package com.databuilders.hoteles;
 
 import com.databuilders.hoteles.modelo.Datos;
-import com.databuilders.hoteles.controlador.Controlador;
-import com.databuilders.hoteles.vista.VistaConsola;
+import com.databuilders.hoteles.controlador.MenuController;
+import com.databuilders.hoteles.vista.MenuView;
+
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
         Datos datos = new Datos();
-        Controlador controlador = new Controlador(datos);
-        VistaConsola vista = new VistaConsola(controlador);
 
-        vista.iniciar();
+        MenuController controlador = new MenuController(datos);
+
+        Scanner teclado = new Scanner(System.in);
+        MenuView vista = new MenuView(controlador, teclado);
+
+        vista.mostrarMenu();
     }
 }
